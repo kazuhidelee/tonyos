@@ -113,31 +113,54 @@ export const openSourceEntries = [
 
 export const experience: ExperienceEntry[] = [
   {
-    company: 'F5',
+    company: 'Everstory',
     role: 'Software Engineering Intern',
-    period: '2025',
+    period: 'May 2025 - Current',
     highlights: [
-      'Built internal tools that improved service visibility and reduced debugging time for engineering teams.',
-      'Worked across backend services and deployment workflows, with an emphasis on reliability and developer experience.',
-      'Focused on practical improvements: cleaner operational insight, safer automation, and clearer interfaces.',
+      'Designed a vector-based retrieval system using HNSW indexing for Approximate Nearest Neighbor retrieval.',
+      'Developed and deployed backend services in Python with FastAPI, including 10+ RESTful API endpoints.',
+      'Integrated Amazon S3 for media storage and OpenAI Whisper for voice search functionality.',
+      'Implemented a CI/CD pipeline with GitHub Actions to auto-provision a Supabase database and run pgTAP unit tests on pull requests, reducing integration errors by 35% before merges.',
     ],
   },
   {
-    company: 'Midas',
-    role: 'Software Engineer',
-    period: '2024',
+    company: 'Ubiquant',
+    role: 'Trading Reliability Engineer ',
+    period: 'Oct 2025 – Dec 2025',
     highlights: [
-      'Delivered backend-heavy product features with attention to data modeling, maintainability, and observability.',
-      'Collaborated across product and engineering to translate requirements into stable service behavior.',
+      'Resolved 20+ production alerts by following SOPs, performing issue triage, and executing Linux system commands (logs, processes, services, networking) to diagnose and stabilize the trading systems.',
+      'Implemented and maintained PTP/NTP time-synchronization services across servers, including configuration, and validation to ensure millisecond-level time accuracy critical for real-time market data.',
+      'Integrated Amazon S3 for media storage and OpenAI Whisper for voice search functionality.',
+      'Built a Python based web crawler that scraped 2,000+ event logs from the internal trading-system monitoring platform, performed data cleaning and analysis, and generated visualizations to identify anomalies using pandas.',
+    ],
+  },
+  {
+    company: 'F5',
+    role: 'Software Engineering Intern',
+    period: 'July 2024 – Oct 2024',
+    highlights: [
+      'Designed and tested a session-aware architecture in C to enable distributed session lookup and deletion across BIG-IP Next instances using Redis and mTLS communication.',
+      'Implemented and exposed the distributed session state management component (dSSM proxy) to support cross-instance session synchronization, facilitating secure request forwarding and session record caching.',
+      'Verified session creation, lookup, and deletion workflows via Pub/Sub, multicast messaging, and internal RedisDB interactions, reducing session resolution time across instances.',
+    ],
+  },
+  {
+    company: 'University of Michigan School of Public Health ',
+    role: 'Technology Research Assistant ',
+    period: 'May 2024 – Dec 2024',
+    highlights: [
+      'Built a full-stack web app with a real-time interactive air quality map and diagram using Typescript and Flask.',
+      'Created and deployed REST API with MySQL and ExpressJS on GCP for 50+ sensor data sources.',
     ],
   },
   {
     company: 'Develop for Good',
-    role: 'Software Engineer',
-    period: '2023',
+    role: 'Product Manager Intern',
+    period: 'May 2024 – Aug 2024',
     highlights: [
-      'Built features for mission-driven products in a team environment with strong iteration and communication loops.',
-      'Practiced shipping maintainable code under real delivery constraints while keeping user needs central.',
+      'Led the development of the Concordia app, a mobile application for 200+ global volunteers to streamline support efforts, impacting 2.8 million people in the Dominican Republic.',
+      'Managed a cross-functional team of 7 in an Agile environment, orchestrating weekly sprints, standups, and retrospectives to ensure alignment and delivery of key milestones.',
+      'Contributed to both full-stack development using React Native and JavaScript, implementing an interactive map interface, user authentication, and Firebase database integration.',
     ],
   },
 ];

@@ -5,6 +5,22 @@ interface DesktopIconPosition {
   y: number;
 }
 
+const BOOT_SEEN_KEY = 'tonyos.bootSeen';
+
+function hasSeenBoot(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return window.localStorage.getItem(BOOT_SEEN_KEY) === 'true';
+}
+
+function markBootSeen() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  window.localStorage.setItem(BOOT_SEEN_KEY, 'true');
+}
+
 interface DesktopState {
   showBoot: boolean;
   bootCompleted: boolean;
@@ -17,12 +33,18 @@ interface DesktopState {
 }
 
 export const useDesktopStore = create<DesktopState>((set) => ({
-  showBoot: true,
-  bootCompleted: false,
+  showBoot: !hasSeenBoot(),
+  bootCompleted: hasSeenBoot(),
   selectedIconId: null,
   iconPositions: {},
-  setBootCompleted: () => set({ bootCompleted: true, showBoot: false }),
-  skipBoot: () => set({ bootCompleted: true, showBoot: false }),
+  setBootCompleted: () => {
+    markBootSeen();
+    set({ bootCompleted: true, showBoot: false });
+  },
+  skipBoot: () => {
+    markBootSeen();
+    set({ bootCompleted: true, showBoot: false });
+  },
   selectIcon: (id) => set({ selectedIconId: id }),
   moveIcon: (id, position) =>
     set((state) => ({

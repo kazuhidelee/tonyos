@@ -1,46 +1,33 @@
-import { profile, projects, experience } from '../../data/portfolioContent';
-import { Panel } from '../ui/Panel';
+import { Win95Button } from '../ui/Win95Button';
+
+const resumeFile = '/Kazuhide_Tony_Lee_Updated_Resume.pdf';
 
 export function ResumeApp() {
   return (
-    <div className="bg-white p-8 text-black">
-      <div className="mx-auto max-w-3xl space-y-8">
-        <header>
-          <h1 className="text-3xl font-bold">{profile.name}</h1>
-          <p className="mt-2 text-sm text-slate-700">{profile.role}</p>
-          <p className="mt-1 text-sm text-slate-600">
-            {profile.location} · {profile.contact.email}
-          </p>
-        </header>
+    <div className="flex h-full flex-col bg-[#c0c0c0] p-3 text-black">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="text-[12px]">Viewing: Kazuhide_Tony_Lee_Updated_Resume.pdf</div>
+        <Win95Button
+          href={resumeFile}
+          download="Kazuhide_Tony_Lee_Resume.pdf"
+          label="Save"
+        />
+      </div>
 
-        <Panel className="bg-[#dfdfdf] shadow-none" title="Summary">
-          <p className="text-sm leading-6 text-black">{profile.tagline}</p>
-        </Panel>
+      <div className="min-h-0 flex-1 border border-[#808080] bg-white">
+        <iframe
+          src={resumeFile}
+          title="Tony Lee Resume"
+          className="h-full w-full border-0"
+        />
+      </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Panel className="bg-[#dfdfdf] shadow-none" title="Experience">
-            <div className="space-y-4">
-              {experience.map((entry) => (
-                <div key={entry.company}>
-                  <div className="font-semibold text-black">{entry.company}</div>
-                  <div className="text-sm text-black/75">
-                    {entry.role} · {entry.period}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Panel>
-          <Panel className="bg-[#dfdfdf] shadow-none" title="Selected Projects">
-            <div className="space-y-4">
-              {projects.map((project) => (
-                <div key={project.slug}>
-                  <div className="font-semibold text-black">{project.title}</div>
-                  <div className="text-sm text-black/75">{project.summary}</div>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        </div>
+      <div className="mt-2 text-[11px]">
+        If the PDF preview does not load,{' '}
+        <a href={resumeFile} download="Kazuhide_Tony_Lee_Resume.pdf" className="underline">
+          download the resume here
+        </a>
+        .
       </div>
     </div>
   );
