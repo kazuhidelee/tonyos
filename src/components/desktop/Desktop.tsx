@@ -56,7 +56,7 @@ const desktopIcons = [
   {
     id: "terminal",
     label: "Terminal",
-    iconSrc: "/Notepad_big.png",
+    iconSrc: "/terminal.png",
     appType: "terminal" as const,
     position: { x: 12, y: 532 },
   },

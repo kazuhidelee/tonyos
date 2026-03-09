@@ -7,11 +7,15 @@ export function TerminalApp() {
   const { cwd, history, runCommand } = useTerminalStore();
   const { openPathWindow } = useWindowStore();
   const [value, setValue] = useState('');
-  const endRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = scrollRef.current;
+    if (!container) {
+      return;
+    }
+    container.scrollTop = container.scrollHeight;
   }, [history]);
 
   useEffect(() => {
@@ -23,7 +27,7 @@ export function TerminalApp() {
       className="flex h-full flex-col bg-black p-4 font-mono text-sm text-white"
       onClick={() => inputRef.current?.focus()}
     >
-      <div className="min-h-0 flex-1 space-y-2 overflow-auto scrollbar-thin">
+      <div ref={scrollRef} className="min-h-0 flex-1 space-y-2 overflow-auto scrollbar-thin">
         {history.map((entry) => (
           <pre
             key={entry.id}
@@ -35,7 +39,6 @@ export function TerminalApp() {
             {entry.content}
           </pre>
         ))}
-        <div ref={endRef} />
       </div>
       <form
         className="mt-4 flex items-center gap-3 border border-white bg-black px-3 py-3"

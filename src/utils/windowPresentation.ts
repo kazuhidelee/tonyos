@@ -4,6 +4,8 @@ export function getWindowIcon(appType: AppType): string {
   switch (appType) {
     case 'spotify':
       return '/CD_small.png';
+    case 'terminal':
+      return '/terminal.png';
     case 'explorer':
     case 'projects':
     case 'experience':
