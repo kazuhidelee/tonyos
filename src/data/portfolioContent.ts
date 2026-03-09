@@ -36,9 +36,9 @@ export const profile = {
     practices: ['Distributed systems', 'API design', 'CI/CD', 'Observability', 'Performance tuning'],
   },
   contact: {
-    email: 'tony@example.com',
-    github: 'https://github.com/tony',
-    linkedin: 'https://linkedin.com/in/tony',
+    email: 'tylee2715@gmail.com',
+    github: 'https://github.com/kazuhidelee',
+    linkedin: 'https://www.linkedin.com/in/tonykazuhidelee/',
   },
 };
 
