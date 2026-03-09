@@ -6,6 +6,7 @@ const defaultTitles: Record<AppType, string> = {
   about: 'about.txt',
   projects: 'projects/',
   experience: 'experience/',
+  artwork: 'artwork/',
   'open-source': 'open-source.md',
   resume: 'resume.pdf',
   contact: 'contact.txt',
@@ -15,6 +16,7 @@ const defaultTitles: Record<AppType, string> = {
   help: 'help',
   explorer: 'files',
   text: 'viewer',
+  image: 'image viewer',
   project: 'project',
   traditional: 'portfolio',
 };
@@ -23,6 +25,7 @@ const defaultSizes: Record<AppType, { width: number; height: number }> = {
   about: { width: 640, height: 480 },
   projects: { width: 800, height: 560 },
   experience: { width: 760, height: 520 },
+  artwork: { width: 860, height: 580 },
   'open-source': { width: 680, height: 460 },
   resume: { width: 760, height: 560 },
   contact: { width: 520, height: 420 },
@@ -32,6 +35,7 @@ const defaultSizes: Record<AppType, { width: number; height: number }> = {
   help: { width: 620, height: 480 },
   explorer: { width: 820, height: 540 },
   text: { width: 680, height: 460 },
+  image: { width: 840, height: 620 },
   project: { width: 780, height: 560 },
   traditional: { width: 1024, height: 680 },
 };

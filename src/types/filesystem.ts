@@ -1,5 +1,5 @@
 export type FileKind = 'directory' | 'file';
-export type FileExtension = 'txt' | 'md' | 'json' | 'pdf';
+export type FileExtension = 'txt' | 'md' | 'json' | 'pdf' | 'jpg' | 'jpeg' | 'png';
 
 export interface FileSystemBase {
   name: string;

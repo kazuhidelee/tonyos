@@ -22,7 +22,8 @@ export function WindowFrame({ window, children }: WindowFrameProps) {
         : null;
   const explorerNode = resolvedPath ? findNode(portfolioFileSystem, resolvedPath) : null;
   const statusText =
-    (window.appType === 'explorer' || window.appType === 'projects') && isDirectory(explorerNode)
+    (window.appType === 'explorer' || window.appType === 'projects' || window.appType === 'artwork') &&
+    isDirectory(explorerNode)
       ? `${explorerNode.children.length} item${explorerNode.children.length === 1 ? '' : 's'}`
       : null;
   const minWidth = 360;

@@ -36,6 +36,10 @@ function getPathLabel(path: string): string {
 
 function resolvePathToApp(path: string): { appType: AppType; title: string; payload?: unknown } {
   const node = findNode(portfolioFileSystem, path.replace(/\/$/, '') || '/');
+  if (path.replace(/\/$/, '') === '/home/tony/artwork' || path === '/home/tony/artwork/') {
+    return { appType: 'artwork', title: 'artwork', payload: { path } };
+  }
+
   if (path.endsWith('/') || isDirectory(node)) {
     return { appType: 'explorer', title: getPathLabel(path), payload: { path } };
   }
@@ -53,6 +57,10 @@ function resolvePathToApp(path: string): { appType: AppType; title: string; payl
 
   if (path.endsWith('.txt') || path.endsWith('.json')) {
     return { appType: 'text', title: getPathLabel(path), payload: { path } };
+  }
+
+  if (/\.(png|jpe?g)$/i.test(path)) {
+    return { appType: 'image', title: getPathLabel(path), payload: { path } };
   }
 
   return { appType: 'explorer', title: getPathLabel(path), payload: { path } };

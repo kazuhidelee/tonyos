@@ -3,6 +3,7 @@ import { AboutApp } from "../apps/AboutApp";
 import { ContactApp } from "../apps/ContactApp";
 import { ExperienceApp } from "../apps/ExperienceApp";
 import { HelpApp } from "../apps/HelpApp";
+import { ImageViewer } from "../apps/ImageViewer";
 // import { OpenSourceApp } from "../apps/OpenSourceApp";
 import { ProjectViewer } from "../apps/ProjectViewer";
 import { ResumeApp } from "../apps/ResumeApp";
@@ -41,6 +42,13 @@ const desktopIcons = [
     appType: "experience" as const,
     position: { x: 12, y: 256 },
   },
+  {
+    id: "artwork",
+    label: "Artwork",
+    iconSrc: "/Paint_big.png",
+    appType: "artwork" as const,
+    position: { x: 12, y: 348 },
+  },
   // {
   //   id: "open-source",
   //   label: "Open Source",
@@ -53,35 +61,35 @@ const desktopIcons = [
     label: "Resume.pdf",
     iconSrc: "/Notepad_big.png",
     appType: "resume" as const,
-    position: { x: 12, y: 348 },
+    position: { x: 12, y: 440 },
   },
   {
     id: "terminal",
     label: "Terminal",
     iconSrc: "/terminal.png",
     appType: "terminal" as const,
-    position: { x: 12, y: 440 },
+    position: { x: 12, y: 532 },
   },
   {
     id: "contact",
     label: "Contact",
     iconSrc: "/Notepad_big.png",
     appType: "contact" as const,
-    position: { x: 12, y: 532 },
+    position: { x: 12, y: 624 },
   },
   {
     id: "spotify",
     label: "Playlists",
     iconSrc: "/CD_big.png",
     appType: "spotify" as const,
-    position: { x: 12, y: 624 },
+    position: { x: 12, y: 716 },
   },
   {
     id: "files",
     label: "Documents",
     iconSrc: "/Documents_big.png",
     appType: "explorer" as const,
-    position: { x: 12, y: 716 },
+    position: { x: 104, y: 72 },
   },
 ];
 
@@ -132,6 +140,8 @@ export function Desktop() {
                       ? { path: "/home/tony" }
                       : item.appType === "projects"
                         ? { path: "/home/tony/projects" }
+                        : item.appType === "artwork"
+                          ? { path: "/home/tony/artwork" }
                         : item.appType === "spotify"
                           ? { view: "home" }
                         : undefined,
@@ -167,6 +177,8 @@ function WindowContent({ window }: { window: AppWindow }) {
       return <FileExplorer initialPath="/home/tony/projects" compact />;
     case "experience":
       return <ExperienceApp />;
+    case "artwork":
+      return <FileExplorer initialPath="/home/tony/artwork" compact />;
     // case "open-source":
     //   return <OpenSourceApp />;
     case "resume":
@@ -189,6 +201,8 @@ function WindowContent({ window }: { window: AppWindow }) {
       );
     case "text":
       return <TextViewer path={(window.payload as { path: string }).path} />;
+    case "image":
+      return <ImageViewer path={(window.payload as { path: string }).path} />;
     case "project":
       return <ProjectViewer path={(window.payload as { path: string }).path} />;
     default:

@@ -53,6 +53,18 @@ export function FileExplorer({ initialPath = '/home/tony', compact = false }: Fi
     openPathWindow(node.path);
   };
 
+  const getNodeIcon = (node: FileSystemNode) => {
+    if (node.kind === 'directory') {
+      return node.path === '/home/tony/artwork' ? '/Paint_big.png' : '/Folder_big.png';
+    }
+
+    if (node.extension === 'png' || node.extension === 'jpg' || node.extension === 'jpeg') {
+      return '/Paint_big.png';
+    }
+
+    return '/Notepad_big.png';
+  };
+
   return (
     <div className="grid h-full grid-cols-[180px_1fr] bg-[#c0c0c0] text-black">
       <aside className="border-r border-[#808080] bg-[#c0c0c0] p-3">
@@ -113,7 +125,7 @@ export function FileExplorer({ initialPath = '/home/tony', compact = false }: Fi
           className="grid gap-x-6 gap-y-4 outline-none sm:grid-cols-2 xl:grid-cols-3"
         >
           {directory.children.map((node) => {
-            const iconSrc = compact ? '/Notepad_big.png' : node.kind === 'directory' ? '/Folder_big.png' : '/Notepad_big.png';
+            const iconSrc = compact ? getNodeIcon(node) : getNodeIcon(node);
             const isSelected = selectedPath === node.path;
             return (
               <button

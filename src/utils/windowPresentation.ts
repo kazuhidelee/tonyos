@@ -6,6 +6,9 @@ export function getWindowIcon(appType: AppType): string {
       return '/CD_small.png';
     case 'terminal':
       return '/terminal.png';
+    case 'artwork':
+    case 'image':
+      return '/Paint_small.png';
     case 'search':
       return '/Search_small.png';
     case 'help':

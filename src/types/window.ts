@@ -2,6 +2,7 @@ export type AppType =
   | 'about'
   | 'projects'
   | 'experience'
+  | 'artwork'
   | 'open-source'
   | 'resume'
   | 'contact'
@@ -11,6 +12,7 @@ export type AppType =
   | 'help'
   | 'explorer'
   | 'text'
+  | 'image'
   | 'project'
   | 'traditional';
 
