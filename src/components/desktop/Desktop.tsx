@@ -2,9 +2,11 @@ import { AnimatePresence } from "framer-motion";
 import { AboutApp } from "../apps/AboutApp";
 import { ContactApp } from "../apps/ContactApp";
 import { ExperienceApp } from "../apps/ExperienceApp";
-import { OpenSourceApp } from "../apps/OpenSourceApp";
+import { HelpApp } from "../apps/HelpApp";
+// import { OpenSourceApp } from "../apps/OpenSourceApp";
 import { ProjectViewer } from "../apps/ProjectViewer";
 import { ResumeApp } from "../apps/ResumeApp";
+import { SearchApp } from "../apps/SearchApp";
 import { TextViewer } from "../apps/TextViewer";
 import { DesktopIcon } from "./DesktopIcon";
 import { FileExplorer } from "../explorer/FileExplorer";
@@ -39,47 +41,47 @@ const desktopIcons = [
     appType: "experience" as const,
     position: { x: 12, y: 256 },
   },
-  {
-    id: "open-source",
-    label: "Open Source",
-    iconSrc: "/Folder_big.png",
-    appType: "open-source" as const,
-    position: { x: 12, y: 348 },
-  },
+  // {
+  //   id: "open-source",
+  //   label: "Open Source",
+  //   iconSrc: "/Folder_big.png",
+  //   appType: "open-source" as const,
+  //   position: { x: 12, y: 348 },
+  // },
   {
     id: "resume",
     label: "Resume.pdf",
     iconSrc: "/Notepad_big.png",
     appType: "resume" as const,
-    position: { x: 12, y: 440 },
+    position: { x: 12, y: 348 },
   },
   {
     id: "terminal",
     label: "Terminal",
     iconSrc: "/terminal.png",
     appType: "terminal" as const,
-    position: { x: 12, y: 532 },
+    position: { x: 12, y: 440 },
   },
   {
     id: "contact",
     label: "Contact",
     iconSrc: "/Notepad_big.png",
     appType: "contact" as const,
-    position: { x: 12, y: 624 },
+    position: { x: 12, y: 532 },
   },
   {
     id: "spotify",
     label: "Playlists",
     iconSrc: "/CD_big.png",
     appType: "spotify" as const,
-    position: { x: 12, y: 716 },
+    position: { x: 12, y: 624 },
   },
   {
     id: "files",
-    label: "Files",
-    iconSrc: "/Folder_big.png",
+    label: "Documents",
+    iconSrc: "/Documents_big.png",
     appType: "explorer" as const,
-    position: { x: 12, y: 808 },
+    position: { x: 12, y: 716 },
   },
 ];
 
@@ -165,14 +167,18 @@ function WindowContent({ window }: { window: AppWindow }) {
       return <FileExplorer initialPath="/home/tony/projects" compact />;
     case "experience":
       return <ExperienceApp />;
-    case "open-source":
-      return <OpenSourceApp />;
+    // case "open-source":
+    //   return <OpenSourceApp />;
     case "resume":
       return <ResumeApp />;
     case "contact":
       return <ContactApp />;
     case "terminal":
       return <TerminalApp />;
+    case "search":
+      return <SearchApp />;
+    case "help":
+      return <HelpApp />;
     case "spotify":
       return <SpotifyExplorerDesktop payload={window.payload as SpotifyWindowPayload | undefined} />;
     case "explorer":

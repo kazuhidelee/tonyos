@@ -1,6 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { portfolioFileSystem } from '../../data/filesystem';
-import { findNode, getBreadcrumbs, isDirectory, isFile } from '../../utils/filesystemHelpers';
+import { findNode, getBreadcrumbs, isDirectory } from '../../utils/filesystemHelpers';
 import { useWindowStore } from '../../store/useWindowStore';
 import type { FileSystemDirectory, FileSystemNode } from '../../types/filesystem';
 import { cn } from '../../utils/ui';
@@ -12,10 +13,37 @@ interface FileExplorerProps {
 
 export function FileExplorer({ initialPath = '/home/tony', compact = false }: FileExplorerProps) {
   const { openPathWindow } = useWindowStore();
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [columnCount, setColumnCount] = useState(1);
+  const gridRef = useRef<HTMLDivElement | null>(null);
   const currentNode = findNode(portfolioFileSystem, initialPath);
   const directory = isDirectory(currentNode) ? currentNode : portfolioFileSystem;
   const breadcrumbs = getBreadcrumbs(directory.path);
   const homeNode = findNode(portfolioFileSystem, '/home/tony');
+
+  useEffect(() => {
+    if (!directory.children.some((node) => node.path === selectedPath)) {
+      setSelectedPath(directory.children[0]?.path ?? null);
+    }
+  }, [directory.children, selectedPath]);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const updateColumns = () => {
+      const styles = window.getComputedStyle(grid);
+      const templateColumns = styles.gridTemplateColumns.split(' ').filter(Boolean);
+      setColumnCount(Math.max(templateColumns.length, 1));
+    };
+
+    updateColumns();
+    const observer = new ResizeObserver(updateColumns);
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, []);
 
   const openNode = (node: FileSystemNode) => {
     if (node.kind === 'directory') {
@@ -53,20 +81,63 @@ export function FileExplorer({ initialPath = '/home/tony', compact = false }: Fi
             </button>
           ))}
         </div>
-        <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          ref={gridRef}
+          tabIndex={0}
+          onKeyDown={(event) => {
+            const currentIndex = directory.children.findIndex((node) => node.path === selectedPath);
+            if (currentIndex === -1) {
+              return;
+            }
+
+            let nextIndex = currentIndex;
+            if (event.key === 'ArrowRight') {
+              nextIndex = Math.min(currentIndex + 1, directory.children.length - 1);
+            } else if (event.key === 'ArrowLeft') {
+              nextIndex = Math.max(currentIndex - 1, 0);
+            } else if (event.key === 'ArrowDown') {
+              nextIndex = Math.min(currentIndex + columnCount, directory.children.length - 1);
+            } else if (event.key === 'ArrowUp') {
+              nextIndex = Math.max(currentIndex - columnCount, 0);
+            } else if (event.key === 'Enter') {
+              event.preventDefault();
+              openNode(directory.children[currentIndex]);
+              return;
+            } else {
+              return;
+            }
+
+            event.preventDefault();
+            setSelectedPath(directory.children[nextIndex]?.path ?? selectedPath);
+          }}
+          className="grid gap-x-6 gap-y-4 outline-none sm:grid-cols-2 xl:grid-cols-3"
+        >
           {directory.children.map((node) => {
             const iconSrc = compact ? '/Notepad_big.png' : node.kind === 'directory' ? '/Folder_big.png' : '/Notepad_big.png';
+            const isSelected = selectedPath === node.path;
             return (
               <button
                 key={node.path}
                 type="button"
                 onDoubleClick={() => openNode(node)}
-                onClick={() => undefined}
-                className={cn('flex w-[92px] flex-col items-center gap-2 bg-transparent p-1 text-center focus:outline-none', 'focus:bg-[#000080]')}
+                onClick={() => setSelectedPath(node.path)}
+                className={cn(
+                  'group flex w-[92px] flex-col items-center gap-2 border border-transparent p-1 text-center focus:outline-none',
+                  isSelected
+                    ? 'bg-[#000080]'
+                    : 'bg-transparent hover:bg-[#000080]',
+                )}
               >
                 <img src={iconSrc} alt="" className="h-8 w-8" />
                 <div>
-                  <div className="text-[12px] leading-tight text-black">{node.name}</div>
+                  <div
+                    className={cn(
+                      'text-[12px] leading-tight',
+                      isSelected ? 'text-white' : 'text-black group-hover:text-white',
+                    )}
+                  >
+                    {node.name}
+                  </div>
                 </div>
               </button>
             );
@@ -89,6 +160,7 @@ function TreeNode({
   depth?: number;
 }) {
   const isActive = currentPath === node.path;
+  const branchPrefix = depth === 0 ? '' : `${'| '.repeat(Math.max(depth - 1, 0))}|- `;
 
   return (
     <div>
@@ -99,8 +171,10 @@ function TreeNode({
           'flex w-full items-center gap-2 px-2 py-1 text-left',
           isActive ? 'bg-[#000080] text-white' : 'text-black',
         )}
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
+        <span className="shrink-0 whitespace-pre font-mono text-[11px] leading-none">
+          {branchPrefix}
+        </span>
         <img src="/Folder_small.png" alt="" className="h-4 w-4 shrink-0" />
         <span className="truncate">{node.name}</span>
       </button>

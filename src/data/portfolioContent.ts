@@ -15,10 +15,6 @@ export interface ExperienceEntry {
   highlights: string[];
 }
 
-
-
-
-
 export const profile = {
   name: 'Tony Lee',
   role: 'Software Engineer focused on systems, infrastructure, and distributed applications',
@@ -42,61 +38,230 @@ export const profile = {
   },
 };
 
-export const projects: ProjectEntry[] = [
-  {
-    slug: 'network-file-server',
-    title: 'Multi-Threaded Network File Server',
-    summary:
-      'A concurrent file server designed to serve directory listings and file transfers under high connection churn.',
+interface RawProjectEntry {
+  projectName: string;
+  type: string;
+  category: string;
+  description: string;
+  date: string;
+  link: string;
+  projectOverview: string;
+}
+
+function toSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function getProjectLinkLabel(link: string): string {
+  if (link.includes('github.com')) {
+    return 'GitHub';
+  }
+  return 'Live Link';
+}
+
+function toProjectEntry(project: RawProjectEntry): ProjectEntry {
+  return {
+    slug: toSlug(project.projectName),
+    title: project.projectName,
+    summary: project.description,
     problem:
-      'I wanted to explore thread scheduling, lock granularity, and filesystem access patterns in a realistic networked workload.',
+      project.projectOverview ||
+      `${project.projectName} is a ${project.type.toLowerCase()} ${project.category.toLowerCase()} project from ${project.date}.`,
     decisions: [
-      'Used a worker pool to cap concurrency and avoid thread explosion under burst traffic.',
-      'Separated metadata lookup from transfer operations to reduce lock hold time.',
-      'Added structured request logging and latency buckets to profile slow paths during load tests.',
+      `Type: ${project.type}`,
+      `Category: ${project.category}`,
+      `Date: ${project.date}`,
     ],
-    tech: ['C++', 'POSIX sockets', 'epoll', 'pthread', 'Linux'],
-    links: [
-      { label: 'GitHub', href: 'https://github.com/tony/network-file-server' },
-      { label: 'Design Notes', href: 'https://example.com/network-file-server' },
-    ],
+    tech: [project.category, project.type, project.date],
+    links:
+      project.link === 'private'
+        ? []
+        : [{ label: getProjectLinkLabel(project.link), href: project.link }],
+  };
+}
+
+const rawProjects: RawProjectEntry[] = [
+  {
+    projectName: 'Personal Website',
+    type: 'Personal',
+    category: 'Web Development',
+    description: 'The portfolio website you are currently viewing!',
+    date: '2025',
+    link: 'https://github.com/kazuhidelee/Personal_Website',
+    projectOverview: '',
   },
   {
-    slug: 'distributed-session-platform',
-    title: 'Distributed Session Management Platform',
-    summary:
-      'A fault-tolerant session service for multi-region web applications with cache-backed reads and durable write paths.',
-    problem:
-      'I wanted to understand the tradeoffs between consistency, failover behavior, and operational simplicity in stateful backend systems.',
-    decisions: [
-      'Modeled sessions as versioned records to support idempotent writes and easier conflict handling.',
-      'Used Redis for low-latency access with Postgres as the authoritative store.',
-      'Instrumented replication lag, session churn, and cache hit rate to guide tuning decisions.',
-    ],
-    tech: ['Go', 'Redis', 'PostgreSQL', 'gRPC', 'Docker'],
-    links: [
-      { label: 'GitHub', href: 'https://github.com/tony/distributed-session-platform' },
-    ],
+    projectName: 'SoleSpeaks',
+    type: 'Academic',
+    category: 'Web Development',
+    description: 'A web application project built for EECS 497.',
+    date: '2025',
+    link: 'https://eecs497.lkellar.org/',
+    projectOverview: '',
   },
   {
-    slug: 'search-engine',
-    title: 'Infrastructure-Aware Search Application',
-    summary:
-      'A full-stack app that pairs a React frontend with a FastAPI backend, focusing on clean APIs and production-friendly deployment.',
-    problem:
-      'The goal was to build a user-facing product while treating deployment, observability, and data flow as first-class engineering concerns.',
-    decisions: [
-      'Kept the frontend state model predictable with typed API contracts and clear fetch boundaries.',
-      'Added background indexing jobs to decouple ingestion from query-time latency.',
-      'Containerized services and added health checks for smoother local and staging workflows.',
-    ],
-    tech: ['React', 'TypeScript', 'FastAPI', 'PostgreSQL', 'Docker Compose'],
-    links: [
-      { label: 'GitHub', href: 'https://github.com/tony/search-engine' },
-      { label: 'Demo', href: 'https://example.com/search-engine' },
-    ],
+    projectName: 'Bubble! - Learn Science',
+    type: 'Industrial',
+    category: 'Web Development',
+    description: 'A web application that aids students with lower resource backgrounds...',
+    date: '2023',
+    link: 'https://github.com/kalifrancisco/bubble-nextjs',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Arbor Advisor',
+    type: 'Industrial',
+    category: 'Web Development',
+    description:
+      'A user-centric website that condenses resources for international, out-of-state, and first-generation students in Washtenaw County.',
+    date: '2023',
+    link: 'https://mandyschen.github.io/WashtenawWelcome/',
+    projectOverview: '',
+  },
+  {
+    projectName: 'AI Chatbot',
+    type: 'Personal',
+    category: 'Web Development',
+    description: 'An AI chatbot website that uses the OpenAI API key.',
+    date: '2024',
+    link: 'https://github.com/kazuhidelee/AI_chatbot',
+    projectOverview:
+      "This is a simple chat application using React.js and the Chat UI Kit library from Chatscope. The application allows users to interact with an AI chatbot powered by OpenAI where users can type messages, which are then sent to the backend (OpenAI's API). First, the message typed by the user is added to the messages array and it will be displayed in the chat UI. Then, the message will be processed into format that is suitable for the Open AI request format. After the conversion, the function will put all the required information (model, API message, system message) in JSON format and send it to the API. If processed successfully, the API will return a response message from ChatGPT, and the function will display the message content onto the chat UI.",
+  },
+  {
+    projectName: 'Windrose API',
+    type: 'Industrial',
+    category: 'Web Development',
+    description:
+      'A public API that fetches historical windrose data from the Southeast Michigan region, used in the air quality map research project.',
+    date: '2024',
+    link: 'https://github.com/kazuhidelee/windrose_api',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Concordia',
+    type: 'Industrial',
+    category: 'Mobile Development',
+    description:
+      'A mobile application for 200+ global volunteers to streamline support efforts, impacting 2.8 million people in the Dominican Republic.',
+    date: '2024',
+    link: 'private',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Search Engine',
+    type: 'Academic',
+    category: 'Distributed System',
+    description:
+      'A scalable search engine similar to Google and Bing using MapReduce, tf-idf, and PageRank to optimize retrieval and link analysis.',
+    date: '2024',
+    link: 'private',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Mapreduce paradigm',
+    type: 'Academic',
+    category: 'Distributed System',
+    description:
+      'A single-machine, multi-process, multi-threaded server that executes user-submitted MapReduce jobs.',
+    date: '2024',
+    link: 'private',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Thread Library',
+    type: 'Academic',
+    category: 'Operating System',
+    description:
+      'A kernel-level thread library similar to the STL library in C++, including CPU, threads, mutex, and condition variable classes.',
+    date: '2025',
+    link: 'private',
+    projectOverview: '',
+  },
+  {
+    projectName: 'External Pager',
+    type: 'Academic',
+    category: 'Operating System',
+    description: 'An external pager that manages virtual memory for application processes.',
+    date: '2025',
+    link: 'private',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Network File System',
+    type: 'Academic',
+    category: 'Operating System',
+    description:
+      'A multi-threaded, secure network file server that allows clients to read, write, and delete files on the server.',
+    date: '2025',
+    link: 'private',
+    projectOverview: '',
+  },
+  {
+    projectName: 'BW Colorization',
+    type: 'Academic',
+    category: 'Computer Vision',
+    description:
+      'A TensorFlow image colorization model inspired by the paper "Colorful Image Colorization" by Zhang et al.',
+    date: '2024',
+    link: 'https://github.com/kazuhidelee/BWToColorized',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Mission Valentine',
+    type: 'Personal',
+    category: 'Game Development',
+    description:
+      'A Valentine-themed mini game with dodge mechanics and hand-drawn pixel art.',
+    date: '2025',
+    link: 'https://github.com/kazuhidelee/mission_valentine',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Monte Carlo Tree Search AI',
+    type: 'Academic',
+    category: 'Artificial Intelligence',
+    description:
+      "An implementation of the Monte Carlo Tree Search algorithm from AlphaZero in the context of the game 'Othello'.",
+    date: '2024',
+    link: 'https://github.com/kazuhidelee/MCTS',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Image Classifier',
+    type: 'Academic',
+    category: 'Artificial Intelligence',
+    description: 'A PyTorch convolutional neural network for image classification.',
+    date: '2024',
+    link: 'https://github.com/kazuhidelee/Image-Classification',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Min-Max Game Agent',
+    type: 'Academic',
+    category: 'Artificial Intelligence',
+    description:
+      'A Tic-Tac-Toe and Connect-4 AI agent using minimax with alpha-beta pruning.',
+    date: '2024',
+    link: 'https://github.com/kazuhidelee/minimax-game-ai',
+    projectOverview: '',
+  },
+  {
+    projectName: 'Maze Search Algorithms',
+    type: 'Academic',
+    category: 'Artificial Intelligence',
+    description:
+      'An AI agent that searches for a path in a maze using BFS, DFS, UCS, and A* search algorithms.',
+    date: '2024',
+    link: 'https://github.com/kazuhidelee/maze-search-algorithms',
+    projectOverview: '',
   },
 ];
+
+export const projects: ProjectEntry[] = rawProjects.map(toProjectEntry);
 
 export const openSourceEntries = [
   {

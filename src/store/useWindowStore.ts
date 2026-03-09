@@ -23,6 +23,7 @@ interface WindowState {
   moveWindow: (id: string, position: WindowPosition) => void;
   resizeWindow: (id: string, size: WindowSize) => void;
   openPathWindow: (path: string) => void;
+  resetWindows: () => void;
 }
 
 function getPathLabel(path: string): string {
@@ -135,4 +136,10 @@ export const useWindowStore = create<WindowState>((set, get) => ({
     const target = resolvePathToApp(normalizedPath);
     get().openWindow(target.appType, { payload: target.payload, title: target.title });
   },
+  resetWindows: () =>
+    set({
+      windows: [],
+      focusedWindowId: null,
+      zCounter: 1,
+    }),
 }));

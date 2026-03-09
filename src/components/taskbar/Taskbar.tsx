@@ -1,13 +1,29 @@
+import { useEffect, useRef, useState } from 'react';
 import { Clock } from './Clock';
 import { useWindowStore } from '../../store/useWindowStore';
 import { cn } from '../../utils/ui';
 import { getWindowIcon } from '../../utils/windowPresentation';
+import { StartMenu } from './StartMenu';
 
 export function Taskbar() {
   const { windows, focusedWindowId, openWindow, restoreWindow, focusWindow } = useWindowStore();
+  const [startOpen, setStartOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setStartOpen(false);
+      }
+    };
+
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => window.removeEventListener('pointerdown', onPointerDown);
+  }, []);
 
   return (
-    <div className="absolute inset-x-0 bottom-0 z-[120]">
+    <div ref={containerRef} className="absolute inset-x-0 bottom-0 z-[120]">
+      {startOpen ? <StartMenu onClose={() => setStartOpen(false)} /> : null}
       <div
         className="flex h-[22px] items-center gap-1 pl-2 pr-0"
         style={{
@@ -18,7 +34,7 @@ export function Taskbar() {
       >
         <button
           type="button"
-          onClick={() => openWindow('explorer', { payload: { path: '/home/tony' }, singleton: true })}
+          onClick={() => setStartOpen((open) => !open)}
           className="h-[22px] w-[60px] shrink-0"
           aria-label="Start"
         >

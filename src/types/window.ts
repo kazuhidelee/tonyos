@@ -7,6 +7,8 @@ export type AppType =
   | 'contact'
   | 'terminal'
   | 'spotify'
+  | 'search'
+  | 'help'
   | 'explorer'
   | 'text'
   | 'project'

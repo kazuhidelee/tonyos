@@ -24,10 +24,13 @@ function markBootSeen() {
 interface DesktopState {
   showBoot: boolean;
   bootCompleted: boolean;
+  bootStarted: boolean;
   selectedIconId: string | null;
   iconPositions: Record<string, DesktopIconPosition>;
   setBootCompleted: () => void;
+  startBoot: () => void;
   skipBoot: () => void;
+  restartSession: () => void;
   selectIcon: (id: string | null) => void;
   moveIcon: (id: string, position: DesktopIconPosition) => void;
 }
@@ -35,15 +38,28 @@ interface DesktopState {
 export const useDesktopStore = create<DesktopState>((set) => ({
   showBoot: !hasSeenBoot(),
   bootCompleted: hasSeenBoot(),
+  bootStarted: hasSeenBoot(),
   selectedIconId: null,
   iconPositions: {},
   setBootCompleted: () => {
     markBootSeen();
-    set({ bootCompleted: true, showBoot: false });
+    set({ bootCompleted: true, showBoot: false, bootStarted: true });
   },
+  startBoot: () => set({ bootStarted: true }),
   skipBoot: () => {
     markBootSeen();
-    set({ bootCompleted: true, showBoot: false });
+    set({ bootCompleted: true, showBoot: false, bootStarted: true });
+  },
+  restartSession: () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(BOOT_SEEN_KEY);
+    }
+    set({
+      showBoot: true,
+      bootCompleted: false,
+      bootStarted: false,
+      selectedIconId: null,
+    });
   },
   selectIcon: (id) => set({ selectedIconId: id }),
   moveIcon: (id, position) =>

@@ -1,4 +1,4 @@
-import { experience, openSourceEntries, profile, projects } from './portfolioContent';
+import { experience, profile, projects } from './portfolioContent';
 import type { FileSystemDirectory } from '../types/filesystem';
 
 const aboutText = [
@@ -91,17 +91,17 @@ export const portfolioFileSystem: FileSystemDirectory = {
                 ].join('\n'),
               })),
             },
-            {
-              name: 'open-source.md',
-              path: '/home/tony/open-source.md',
-              kind: 'file',
-              extension: 'md',
-              content: [
-                '# Open Source',
-                '',
-                ...openSourceEntries.flatMap((entry) => [`## ${entry.name}`, entry.description, '']),
-              ].join('\n'),
-            },
+            // {
+            //   name: 'open-source.md',
+            //   path: '/home/tony/open-source.md',
+            //   kind: 'file',
+            //   extension: 'md',
+            //   content: [
+            //     '# Open Source',
+            //     '',
+            //     ...openSourceEntries.flatMap((entry) => [`## ${entry.name}`, entry.description, '']),
+            //   ].join('\n'),
+            // },
             {
               name: 'resume.pdf',
               path: '/home/tony/resume.pdf',

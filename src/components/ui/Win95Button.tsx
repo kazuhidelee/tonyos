@@ -5,6 +5,8 @@ interface Win95ButtonProps {
   label: string;
   href?: string;
   download?: string;
+  target?: string;
+  rel?: string;
   disabled?: boolean;
   className?: string;
   onClick?: () => void;
@@ -28,13 +30,15 @@ function getButtonAsset({
   if (focused) {
     return '/State=Focus.png';
   }
-  return '/State=Preferred.png';
+  return '/State=default.png';
 }
 
 export function Win95Button({
   label,
   href,
   download,
+  target,
+  rel,
   disabled = false,
   className,
   onClick,
@@ -45,7 +49,7 @@ export function Win95Button({
 
   const content = (
     <>
-      <img src={asset} alt="" aria-hidden="true" className="h-[24px] w-[60px]" />
+      <img src={asset} alt="" aria-hidden="true" className="h-[24px] w-full" />
       <span
         className={cn(
           'absolute inset-0 flex items-center justify-center text-[11px] text-black',
@@ -72,7 +76,7 @@ export function Win95Button({
 
   if (href && !disabled) {
     return (
-      <a href={href} download={download} {...sharedProps}>
+      <a href={href} download={download} target={target} rel={rel} {...sharedProps}>
         {content}
       </a>
     );
