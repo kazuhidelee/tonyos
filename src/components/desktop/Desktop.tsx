@@ -14,6 +14,8 @@ import { WindowFrame } from "../windows/WindowFrame";
 import { useWindowStore } from "../../store/useWindowStore";
 import type { AppWindow } from "../../types/window";
 import { useDesktopStore } from "../../store/useDesktopStore";
+import { SpotifyExplorerDesktop } from "../spotify/SpotifyExplorerDesktop";
+import type { SpotifyWindowPayload } from "../../types/spotify";
 
 const desktopIcons = [
   {
@@ -66,11 +68,18 @@ const desktopIcons = [
     position: { x: 12, y: 624 },
   },
   {
+    id: "spotify",
+    label: "Playlists",
+    iconSrc: "/CD_big.png",
+    appType: "spotify" as const,
+    position: { x: 12, y: 716 },
+  },
+  {
     id: "files",
     label: "Files",
     iconSrc: "/Folder_big.png",
     appType: "explorer" as const,
-    position: { x: 12, y: 716 },
+    position: { x: 12, y: 808 },
   },
 ];
 
@@ -121,6 +130,8 @@ export function Desktop() {
                       ? { path: "/home/tony" }
                       : item.appType === "projects"
                         ? { path: "/home/tony/projects" }
+                        : item.appType === "spotify"
+                          ? { view: "home" }
                         : undefined,
                   title: item.label,
                 },
@@ -162,6 +173,8 @@ function WindowContent({ window }: { window: AppWindow }) {
       return <ContactApp />;
     case "terminal":
       return <TerminalApp />;
+    case "spotify":
+      return <SpotifyExplorerDesktop payload={window.payload as SpotifyWindowPayload | undefined} />;
     case "explorer":
       return (
         <FileExplorer

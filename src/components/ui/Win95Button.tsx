@@ -7,6 +7,7 @@ interface Win95ButtonProps {
   download?: string;
   disabled?: boolean;
   className?: string;
+  onClick?: () => void;
 }
 
 function getButtonAsset({
@@ -36,6 +37,7 @@ export function Win95Button({
   download,
   disabled = false,
   className,
+  onClick,
 }: Win95ButtonProps) {
   const [pressed, setPressed] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -77,7 +79,7 @@ export function Win95Button({
   }
 
   return (
-    <button type="button" disabled={disabled} {...sharedProps}>
+    <button type="button" disabled={disabled} onClick={onClick} {...sharedProps}>
       {content}
     </button>
   );

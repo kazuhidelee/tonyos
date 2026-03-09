@@ -4,6 +4,7 @@ import type { AppWindow } from '../../types/window';
 import { useWindowStore } from '../../store/useWindowStore';
 import { portfolioFileSystem } from '../../data/filesystem';
 import { findNode, isDirectory } from '../../utils/filesystemHelpers';
+import { getWindowIcon } from '../../utils/windowPresentation';
 
 interface WindowFrameProps extends PropsWithChildren {
   window: AppWindow;
@@ -11,8 +12,7 @@ interface WindowFrameProps extends PropsWithChildren {
 
 export function WindowFrame({ window, children }: WindowFrameProps) {
   const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, moveWindow, resizeWindow } = useWindowStore();
-  const isFolderWindow = ['explorer', 'projects', 'experience'].includes(window.appType);
-  const titleIcon = isFolderWindow ? '/Folder_small.png' : '/Notepad_small.png';
+  const titleIcon = getWindowIcon(window.appType);
   const explorerPath = (window.payload as { path?: string } | undefined)?.path;
   const resolvedPath =
     window.appType === 'projects'

@@ -1,6 +1,7 @@
 import { Clock } from './Clock';
 import { useWindowStore } from '../../store/useWindowStore';
 import { cn } from '../../utils/ui';
+import { getWindowIcon } from '../../utils/windowPresentation';
 
 export function Taskbar() {
   const { windows, focusedWindowId, openWindow, restoreWindow, focusWindow } = useWindowStore();
@@ -43,7 +44,7 @@ export function Taskbar() {
                   filter: active ? 'none' : 'grayscale(0.08)',
                 }}
               >
-                <img src="/Folder_small.png" alt="" className="h-4 w-4 shrink-0" />
+                <img src={getWindowIcon(window.appType)} alt="" className="h-4 w-4 shrink-0" />
                 <span className="block truncate">{window.title}</span>
               </button>
             );

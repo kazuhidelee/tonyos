@@ -6,6 +6,7 @@ export type AppType =
   | 'resume'
   | 'contact'
   | 'terminal'
+  | 'spotify'
   | 'explorer'
   | 'text'
   | 'project'
