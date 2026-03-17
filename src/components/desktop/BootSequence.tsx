@@ -76,36 +76,44 @@ export function BootSequence() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-[#000080] px-6 text-white"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black px-4 py-6 text-white"
       onClick={() => {
         if (!bootStarted) {
           startBoot();
         }
       }}
     >
-      <div className="flex w-full max-w-4xl flex-col items-center justify-center text-center">
-        <div className="mb-6 w-full">
-          <pre className="overflow-x-auto whitespace-pre text-center font-mono text-[10px] leading-[1.15] text-white sm:text-[12px]">
-            {titleArt || 'TonyOS'}
-          </pre>
-          <p className="mt-4 text-[18px] text-white">Tony Lee&apos;s Portfolio</p>
-        </div>
+      <div className="relative w-full max-w-[1100px]">
+        <img src="/bigcomputer.png" alt="" className="mx-auto w-full select-none" />
 
-        {!bootStarted ? (
-          <div className="w-full max-w-2xl text-left font-mono text-[16px] leading-7 text-white">
-            <div>System ready.</div>
-            <div className="mt-4">Press Enter or Space to start booting.</div>
-            <div className="mt-4 inline-block h-4 w-2 animate-blink bg-white align-middle" />
+        <div className="absolute left-[29.8%] top-[6.7%] h-[43%] w-[40.7%] overflow-hidden bg-[#000080] px-[4.2%] py-[4.4%] shadow-[inset_0_0_32px_rgba(120,255,255,0.24)]">
+          <div className="flex h-full flex-col text-left">
+            <div className="mb-4">
+              <pre className="overflow-hidden whitespace-pre text-center font-mono text-[5px] leading-[1.15] text-white sm:text-[7px] md:text-[9px] lg:text-[10px]">
+                {titleArt || 'TonyOS'}
+              </pre>
+              <p className="mt-3 text-center text-[9px] text-white sm:text-[12px] md:text-[14px]">
+                Tony Lee&apos;s Portfolio
+              </p>
+            </div>
+
+            {!bootStarted ? (
+              <div className="text-left font-mono text-[8px] leading-[1.65] text-white sm:text-[10px] md:text-[13px]">
+                <div>System ready.</div>
+                <div className="mt-3">Press Enter or Space to start booting.</div>
+                <div className="mt-3 inline-block h-3 w-1.5 animate-blink bg-white align-middle md:h-4 md:w-2" />
+              </div>
+            ) : (
+              <div className="font-mono text-[8px] leading-[1.65] text-white sm:text-[10px] md:text-[13px]">
+                {visibleLines.map((line) => (
+                  <div key={line}>{line}</div>
+                ))}
+                <div className="mt-3">{loadingBar}</div>
+                {!done && <div className="inline-block h-3 w-1.5 animate-blink bg-white align-middle md:h-4 md:w-2" />}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="w-full max-w-2xl text-left font-mono text-[16px] leading-7 text-white">
-            {visibleLines.map((line) => (
-              <div key={line}>{line}</div>
-            ))}
-            <div className="mt-4">{loadingBar}</div>
-            {!done && <div className="inline-block h-4 w-2 animate-blink bg-white align-middle" />}
-          </div>
-        )}
+        </div>
       </div>
     </motion.div>
   );
