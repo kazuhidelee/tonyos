@@ -26,10 +26,25 @@ export const profile = {
     'Beyond coding, my unique experience of growing up across countries like China, Korea, and Japan has shaped my adaptability in different environments, and also given me an ability to view situations in diverse perspectives, which I believe will be a great asset and skill I can bring to the table.',
     'For hobbies, I enjoy making music playlists and art!',
   ],
+  Education:[
+    {
+      school: "University of Michigan - Ann Arbor",
+      duration: "2023 - 2025",
+      degree: "B.S. in Computer Science",
+    },
+    {
+      school: "New York University - Courant Institution",
+      duration: "Incoming 2026",
+      degree: "M.S. in Computer Science",
+    },
+  ],
   skills: {
-    languages: ['TypeScript', 'Python', 'Go', 'Java', 'SQL', 'Bash'],
-    systems: ['Linux', 'Docker', 'Kubernetes', 'PostgreSQL', 'Redis', 'Nginx'],
-    practices: ['Distributed systems', 'API design', 'CI/CD', 'Observability', 'Performance tuning'],
+    languages: ['C/C++', 'Python', 'PHP', 'Java', 'TypeScript/JavaScript'],
+    systems: ['Linux', 'Docker', 'Kubernetes', 'PostgreSQL', 'Redis', 'Git'],
+    databases: ['SQL', 'MongoDB', 'Supabase', 'AWS', 'GCP'],
+  },
+  language_skills:{
+    languages: ["English", "Korean", "Mandarin", "Japanese"],
   },
   contact: {
     email: 'tylee2715@gmail.com',
