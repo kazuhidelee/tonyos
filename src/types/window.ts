@@ -30,6 +30,7 @@ export interface AppWindow {
   id: string;
   appType: AppType;
   title: string;
+  singletonKey?: string;
   isMinimized: boolean;
   isMaximized: boolean;
   zIndex: number;

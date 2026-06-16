@@ -293,6 +293,16 @@ export const openSourceEntries = [
 
 export const experience: ExperienceEntry[] = [
   {
+    company: 'Linux Foundation (OpenSSF)',
+    role: 'Software Engineering Intern, LFX mentorship',
+    period: 'May 2025 - Current',
+    highlights: [
+      'Contributing security-focused features for gittuf, an OpenSSF repository security framework that enables policy-driven software supply chain protections across Git hosting platforms.',
+      'Owning the end-to-end development of gittuf visualizer, including UI/UX design, full-stack development, deployment, and technical decisions across the application stack.',
+      'Improving the gittuf Terminal User Interface (TUI) to streamline developer workflows and improve accessibility for repository security management.',
+    ],
+  },
+  {
     company: 'Everstory',
     role: 'Software Engineering Intern',
     period: 'May 2025 - Current',

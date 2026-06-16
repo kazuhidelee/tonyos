@@ -7,6 +7,7 @@ import { findNode, isDirectory } from '../utils/filesystemHelpers';
 interface OpenWindowOptions {
   payload?: unknown;
   singleton?: boolean;
+  singletonKey?: string;
   title?: string;
 }
 
@@ -32,6 +33,11 @@ function getPathLabel(path: string): string {
     return '/';
   }
   return normalized.split('/').pop() ?? normalized;
+}
+
+function getPathSingletonKey(path: string): string {
+  const normalized = path.replace(/\/$/, '') || '/';
+  return `path:${normalized}`;
 }
 
 function resolvePathToApp(path: string): { appType: AppType; title: string; payload?: unknown } {
@@ -73,7 +79,11 @@ export const useWindowStore = create<WindowState>((set, get) => ({
   openWindow: (appType, options) =>
     set((state) => {
       if (options?.singleton) {
-        const existing = state.windows.find((window) => window.appType === appType);
+        const existing = state.windows.find((window) =>
+          options.singletonKey
+            ? window.singletonKey === options.singletonKey
+            : window.appType === appType,
+        );
         if (existing) {
           const nextZ = state.zCounter + 1;
           return {
@@ -88,6 +98,7 @@ export const useWindowStore = create<WindowState>((set, get) => ({
 
       const nextZ = state.zCounter + 1;
       const window = createWindow(appType, options?.payload, {
+        singletonKey: options?.singletonKey,
         title: options?.title ?? undefined,
         zIndex: nextZ,
       });
@@ -142,7 +153,15 @@ export const useWindowStore = create<WindowState>((set, get) => ({
   openPathWindow: (path) => {
     const normalizedPath = path;
     const target = resolvePathToApp(normalizedPath);
-    get().openWindow(target.appType, { payload: target.payload, title: target.title });
+    get().openWindow(target.appType, {
+      payload: target.payload,
+      title: target.title,
+      singleton: target.appType === 'resume' || target.appType === 'explorer',
+      singletonKey:
+        target.appType === 'resume' || target.appType === 'explorer'
+          ? getPathSingletonKey(path)
+          : undefined,
+    });
   },
   resetWindows: () =>
     set({

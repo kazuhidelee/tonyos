@@ -130,25 +130,36 @@ export function Desktop() {
             isSelected={selectedIconId === item.id}
             onSelect={() => selectIcon(item.id)}
             onMove={(position) => moveIcon(item.id, position)}
-            onOpen={() =>
-              openWindow(
-                item.appType,
-                {
-                  singleton: false,
-                  payload:
-                    item.appType === "explorer"
-                      ? { path: "/home/tony" }
-                      : item.appType === "projects"
-                        ? { path: "/home/tony/projects" }
-                        : item.appType === "artwork"
-                          ? { path: "/home/tony/artwork" }
+            onOpen={() => {
+              const pathPayload =
+                item.appType === "explorer"
+                  ? "/home/tony"
+                  : item.appType === "projects"
+                    ? "/home/tony/projects"
+                    : item.appType === "artwork"
+                      ? "/home/tony/artwork"
+                      : item.appType === "resume"
+                        ? "/home/tony/resume.pdf"
+                        : undefined;
+
+              openWindow(item.appType, {
+                singleton: Boolean(pathPayload),
+                singletonKey: pathPayload ? `path:${pathPayload}` : undefined,
+                payload:
+                  item.appType === "explorer"
+                    ? { path: "/home/tony" }
+                    : item.appType === "projects"
+                      ? { path: "/home/tony/projects" }
+                      : item.appType === "artwork"
+                        ? { path: "/home/tony/artwork" }
                         : item.appType === "spotify"
                           ? { view: "home" }
-                        : undefined,
-                  title: item.label,
-                },
-              )
-            }
+                          : item.appType === "resume"
+                            ? { path: "/home/tony/resume.pdf" }
+                            : undefined,
+                title: item.label,
+              });
+            }}
           />
         ))}
       </div>

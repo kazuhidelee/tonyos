@@ -1,6 +1,6 @@
 import { Win95Button } from '../ui/Win95Button';
 
-const resumeFile = '/Kazuhide_Tony_Lee_Updated_Resume.pdf';
+const resumeFile = `${import.meta.env.BASE_URL}Kazuhide_Tony_Lee_Updated_Resume.pdf`;
 
 export function ResumeApp() {
   return (
@@ -18,6 +18,7 @@ export function ResumeApp() {
         <iframe
           src={resumeFile}
           title="Tony Lee Resume"
+          loading="lazy"
           className="h-full w-full border-0"
         />
       </div>
