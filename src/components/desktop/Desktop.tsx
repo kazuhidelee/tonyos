@@ -6,6 +6,7 @@ import { HelpApp } from "../apps/HelpApp";
 import { ImageViewer } from "../apps/ImageViewer";
 // import { OpenSourceApp } from "../apps/OpenSourceApp";
 import { ProjectViewer } from "../apps/ProjectViewer";
+import { ProjectsApp } from "../apps/ProjectsApp";
 import { ResumeApp } from "../apps/ResumeApp";
 import { SearchApp } from "../apps/SearchApp";
 import { TextViewer } from "../apps/TextViewer";
@@ -185,7 +186,7 @@ function WindowContent({ window }: { window: AppWindow }) {
     case "about":
       return <AboutApp />;
     case "projects":
-      return <FileExplorer initialPath="/home/tony/projects" compact />;
+      return <ProjectsApp windowId={window.id} />;
     case "experience":
       return <ExperienceApp />;
     case "artwork":

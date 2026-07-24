@@ -1,55 +1,100 @@
-import { ExternalLink, GitBranch } from 'lucide-react';
+import { useState } from 'react';
 import { projects } from '../../data/portfolioContent';
 import { Panel } from '../ui/Panel';
+import { useWindowStore } from '../../store/useWindowStore';
 
-export function ProjectsApp() {
+const placeholderPreview = `${import.meta.env.BASE_URL}merlin-microsoft-wizard.jpeg`;
+const projectPreviews: Record<string, string> = {
+  'bw-colorization': `${import.meta.env.BASE_URL}project-icon-bw-colorization.jpeg`,
+  concordia: `${import.meta.env.BASE_URL}concordia-preview.png`,
+  'network-file-system': `${import.meta.env.BASE_URL}network-file-system-preview.png`,
+  'search-engine': `${import.meta.env.BASE_URL}project-icon-search-engine.jpeg`,
+  'tamagotchi-os': `${import.meta.env.BASE_URL}project-icon-tamagotchi-os.jpeg`,
+  'windrose-api': `${import.meta.env.BASE_URL}project-icon-windrose-api.jpeg`,
+};
+const projectPreviewPositions: Record<string, string> = {
+  'bw-colorization': 'center',
+  concordia: '65% center',
+  'search-engine': 'center',
+  'tamagotchi-os': 'center',
+  'windrose-api': 'center',
+};
+
+interface ProjectsAppProps {
+  windowId: string;
+}
+
+export function ProjectsApp({ windowId }: ProjectsAppProps) {
+  const [selectedSlug, setSelectedSlug] = useState(projects[0]?.slug ?? '');
+  const { closeWindow, openPathWindow } = useWindowStore();
+  const selectedProject = projects.find((project) => project.slug === selectedSlug) ?? projects[0];
+  const selectedPreview = projectPreviews[selectedProject?.slug] ?? placeholderPreview;
+  const selectedPreviewPosition = projectPreviewPositions[selectedProject?.slug] ?? 'center';
+
+  if (!selectedProject) {
+    return null;
+  }
+
   return (
-    <div className="space-y-5 p-5">
-      {projects.map((project) => (
-        <Panel key={project.slug} title={project.title} subtitle={project.summary}>
-          <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="space-y-4 text-sm leading-6 text-black">
-              <p>
-                <span className="font-bold">Problem:</span> {project.problem}
-              </p>
-              <div>
-                <div className="mb-2 font-bold">Engineering decisions</div>
-                <ul className="space-y-2">
-                  {project.decisions.map((item) => (
-                    <li key={item}>- {item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <div className="mb-2 text-xs font-bold uppercase">Stack</div>
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((item) => (
-                    <span key={item} className="border border-black bg-[#dfdfdf] px-2 py-1 text-xs text-black shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#808080]">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                {project.links.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-2 border border-black bg-[#dfdfdf] px-3 py-2 text-sm text-black shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#808080]"
+    <div className="bg-[#f7f3de] p-5">
+      <Panel
+        title="Projects"
+        subtitle="Select a project to open its full description."
+        className="border-black bg-[#f7f3de] shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#000000,1px_1px_0_#ffffff]"
+      >
+        <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+          <div className="border border-black bg-[#f7f3df] p-2 shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#000000,1px_1px_0_#ffffff]">
+            <div className="mb-1 border-b border-black pb-1 text-xs font-bold text-black">Project Library</div>
+            <div className="classic-scroll-area h-[320px] overflow-y-auto border border-black bg-white">
+              {projects.map((project) => {
+                const isSelected = project.slug === selectedProject.slug;
+                return (
+                  <button
+                    key={project.slug}
+                    type="button"
+                    onClick={() => setSelectedSlug(project.slug)}
+                    className={`block w-full border-b border-black/10 px-2 py-1 text-left text-sm ${
+                      isSelected ? 'bg-[#000080] text-white' : 'bg-white text-black hover:bg-[#dfdfdf]'
+                    }`}
                   >
-                    {link.label === 'GitHub' ? <GitBranch className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
-                    {link.label}
-                  </a>
-                ))}
-              </div>
+                    {project.title}
+                  </button>
+                );
+              })}
             </div>
           </div>
-        </Panel>
-      ))}
+
+          <div className="flex flex-col justify-between border border-black bg-[#f7f3df] p-3 shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#000000,1px_1px_0_#ffffff]">
+            <div className="border border-black bg-white p-2 shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#000000,1px_1px_0_#ffffff]">
+              <img
+                src={selectedPreview}
+                alt={`${selectedProject.title} preview`}
+                draggable={false}
+                className="mx-auto h-[260px] w-full select-none object-contain"
+                style={{ objectPosition: selectedPreviewPosition }}
+              />
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  openPathWindow(`/home/tony/projects/${selectedProject.slug}.md`);
+                }}
+                className="min-w-[120px] border border-black bg-[#f7f3df] px-6 py-2 text-sm text-black shadow-[inset_-1px_-1px_0_#000000,inset_1px_1px_0_#ffffff]"
+              >
+                Open
+              </button>
+              <button
+                type="button"
+                onClick={() => closeWindow(windowId)}
+                className="min-w-[120px] border border-black bg-[#f7f3df] px-6 py-2 text-sm text-black shadow-[inset_-1px_-1px_0_#000000,inset_1px_1px_0_#ffffff]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </Panel>
     </div>
   );
 }

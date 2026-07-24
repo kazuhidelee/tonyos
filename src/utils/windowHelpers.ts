@@ -36,7 +36,7 @@ const defaultSizes: Record<AppType, { width: number; height: number }> = {
   explorer: { width: 820, height: 540 },
   text: { width: 680, height: 460 },
   image: { width: 840, height: 620 },
-  project: { width: 780, height: 560 },
+  project: { width: 980, height: 720 },
   traditional: { width: 1024, height: 680 },
 };
 

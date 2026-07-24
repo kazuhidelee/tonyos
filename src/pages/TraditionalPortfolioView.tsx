@@ -9,7 +9,7 @@ interface TraditionalPortfolioViewProps {
 
 export function TraditionalPortfolioView({ embedded = false }: TraditionalPortfolioViewProps) {
   return (
-    <div className={cn('h-full overflow-auto bg-[#c0c0c0] text-black scrollbar-thin', embedded ? 'p-5' : 'h-screen p-6 md:p-10')}>
+    <div className={cn('classic-scroll-area h-full overflow-auto bg-[#c0c0c0] text-black', embedded ? 'p-5' : 'h-screen p-6 md:p-10')}>
       <div className="mx-auto max-w-6xl space-y-6">
         <section className="border border-black bg-[#c0c0c0] p-6 shadow-[-1px_-1px_0_#ffffff,inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff,1px_1px_0_#000000] md:p-8">
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -78,7 +78,8 @@ export function TraditionalPortfolioView({ embedded = false }: TraditionalPortfo
               <article key={project.slug} className="border border-black bg-[#dfdfdf] p-4 shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#808080]">
                 <h3 className="text-lg font-semibold text-black">{project.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-black">{project.summary}</p>
-                <p className="mt-3 text-sm leading-7 text-black/75">{project.problem}</p>
+                <p className="mt-3 text-sm leading-7 text-black/75">{project.role}</p>
+                <p className="mt-3 text-sm leading-7 text-black/75">{project.outcome}</p>
               </article>
             ))}
           </div>

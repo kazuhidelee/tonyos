@@ -150,7 +150,7 @@ export function WindowFrame({ window, children }: WindowFrameProps) {
           aria-hidden="true"
           className="absolute inset-0 h-full w-full select-none"
         />
-        <div className="relative h-full overflow-auto px-3 py-2 scrollbar-thin">{children}</div>
+        <div className="classic-scroll-area relative h-full overflow-auto px-3 py-2">{children}</div>
       </div>
 
       {statusText ? (

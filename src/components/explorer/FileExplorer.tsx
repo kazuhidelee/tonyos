@@ -79,7 +79,7 @@ export function FileExplorer({ initialPath = '/home/tony', compact = false }: Fi
           </div>
         ) : null}
       </aside>
-      <div className="min-h-0 h-full overflow-auto bg-white p-4 scrollbar-thin">
+      <div className="classic-scroll-area min-h-0 h-full overflow-auto bg-white p-4">
         <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
           {breadcrumbs.map((crumb, index) => (
             <button

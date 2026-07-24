@@ -134,7 +134,7 @@ export function SpotifyExplorerDesktop({
             </span>
           </div>
           <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_220px] gap-3">
-            <div className="min-h-0 overflow-auto border border-[#808080] bg-white p-3 scrollbar-thin">
+            <div className="classic-scroll-area min-h-0 overflow-auto border border-[#808080] bg-white p-3">
               <div className="flex flex-wrap gap-x-4 gap-y-3">
                 {playlists.map((playlist) => (
                   <PlaylistIcon

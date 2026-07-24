@@ -27,7 +27,7 @@ export function TerminalApp() {
       className="flex h-full flex-col bg-black p-4 font-mono text-sm text-white"
       onClick={() => inputRef.current?.focus()}
     >
-      <div ref={scrollRef} className="min-h-0 flex-1 space-y-2 overflow-auto scrollbar-thin">
+      <div ref={scrollRef} className="classic-scroll-area min-h-0 flex-1 space-y-2 overflow-auto">
         {history.map((entry) => (
           <pre
             key={entry.id}

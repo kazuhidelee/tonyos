@@ -43,7 +43,7 @@ export function PlaylistContentsWindow({ playlist }: PlaylistContentsWindowProps
           <span>Album</span>
           <span className="justify-self-end">Length</span>
         </div>
-        <div className="min-h-0 flex-1 overflow-auto border-x border-b border-[#808080] bg-white scrollbar-thin">
+        <div className="classic-scroll-area min-h-0 flex-1 overflow-auto border-x border-b border-[#808080] bg-white">
           {trackState?.isLoading ? (
             <div className="p-4 text-[12px]">Loading playlist contents...</div>
           ) : trackState?.error ? (

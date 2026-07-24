@@ -32,7 +32,7 @@ export function AboutApp() {
         <div className="grid gap-5 lg:grid-cols-[240px_1fr] lg:items-start">
           <div className="space-y-4">
             {asciiArt ? (
-              <div className="overflow-auto bg-white p-2">
+              <div className="classic-scroll-area overflow-auto bg-white p-2">
                 <pre className="whitespace-pre font-mono text-[5px] leading-[5px] text-black">{asciiArt}</pre>
               </div>
             ) : null}
