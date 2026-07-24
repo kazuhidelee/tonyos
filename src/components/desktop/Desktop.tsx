@@ -32,7 +32,7 @@ const desktopIcons = [
   {
     id: "projects",
     label: "Projects",
-    iconSrc: "/Folder_big.png",
+    iconSrc: "/Tools_big.png",
     appType: "projects" as const,
     position: { x: 12, y: 164 },
   },

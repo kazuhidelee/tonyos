@@ -55,6 +55,9 @@ export function FileExplorer({ initialPath = '/home/tony', compact = false }: Fi
 
   const getNodeIcon = (node: FileSystemNode) => {
     if (node.kind === 'directory') {
+      if (node.path === '/home/tony/projects') {
+        return '/Tools_big.png';
+      }
       return node.path === '/home/tony/artwork' ? '/Paint_big.png' : '/Folder_big.png';
     }
 
@@ -187,7 +190,7 @@ function TreeNode({
         <span className="shrink-0 whitespace-pre font-mono text-[11px] leading-none">
           {branchPrefix}
         </span>
-        <img src="/Folder_small.png" alt="" className="h-4 w-4 shrink-0" />
+        <img src={node.path === '/home/tony/projects' ? '/Tools_small.png' : '/Folder_small.png'} alt="" className="h-4 w-4 shrink-0" />
         <span className="truncate">{node.name}</span>
       </button>
       {node.children

@@ -16,7 +16,13 @@ export function getWindowIcon(appType: AppType): string {
     case 'explorer':
     case 'projects':
     case 'experience':
-      return appType === 'explorer' ? '/Documents_small.png' : '/Folder_small.png';
+      if (appType === 'explorer') {
+        return '/Documents_small.png';
+      }
+      if (appType === 'projects') {
+        return '/Tools_small.png';
+      }
+      return '/Folder_small.png';
     default:
       return '/Notepad_small.png';
   }

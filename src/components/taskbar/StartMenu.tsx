@@ -144,7 +144,7 @@ function StartMenuDirectoryItem({
               <StartMenuDirectoryItem
                 key={child.path}
                 label={child.name}
-                icon="/Folder_small.png"
+                icon={child.path === '/home/tony/projects' ? '/Tools_small.png' : '/Folder_small.png'}
                 directory={child}
                 onOpenPath={onOpenPath}
               />

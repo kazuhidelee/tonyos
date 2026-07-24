@@ -22,7 +22,7 @@ const defaultTitles: Record<AppType, string> = {
 };
 
 const defaultSizes: Record<AppType, { width: number; height: number }> = {
-  about: { width: 640, height: 480 },
+  about: { width: 900, height: 620 },
   projects: { width: 800, height: 560 },
   experience: { width: 760, height: 520 },
   artwork: { width: 860, height: 580 },
