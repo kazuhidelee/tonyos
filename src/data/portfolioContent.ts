@@ -19,6 +19,7 @@ export interface ProjectExtraSlide {
   bullets?: string[];
   image?: string;
   imageAlt?: string;
+  zoomableImage?: boolean;
   images?: Array<{ src: string; alt: string }>;
 }
 
@@ -129,27 +130,27 @@ const rawProjects: RawProjectEntry[] = [
   {
     projectName: 'Budget-Constrained Deep Research Agent',
     description:
-      'A budget-aware research agent that answers multi-part strategy questions by routing retrieval, compressing evidence, and synthesizing conclusions under fixed token, source, and cost limits.',
+      'A budget-constrained research agent that answers multi-step questions by planning sub-queries, retrieving evidence, compressing sources into notes, and synthesizing a final answer under explicit token and cost limits.',
     overview:
-      'A deep-research agent for long-form analysis that was designed around a real LLM systems constraint: producing useful multi-source reports without blowing through context windows or API budget. Instead of stuffing all retrieved text into one final prompt, the system decomposes the question, compresses evidence into notes, and only carries forward the highest-value information.',
+      'I built a budget-aware research agent that answers complex questions by decomposing them into subproblems, retrieving supporting evidence, ranking and compressing that evidence, and generating a final recommendation under explicit session constraints. A lot of AI research assistant projects are really just wrappers around a single model call; I wanted to build a version where context, memory, and cost constraints were visible and enforced.',
     role: 'Solo',
     approach:
-      'The system uses a query planner, retrieval router, evidence compressor, memory store, budget manager, top-k evidence selector, and a final synthesizer. It runs offline against a bundled corpus by default, and can switch to live Tavily retrieval plus OpenAI-backed synthesis when keys are available.',
+      'The system starts by planning sub-questions from a user query, then routes retrieval to live web search or a local fallback corpus. Retrieved documents are compressed into evidence notes, stored in a temporary memory layer, filtered through a budget manager that limits retained sources, tokens, and estimated cost, and finally synthesized from only the top retained notes. The UI exposes the answer, evidence trail, claim mapping, retrieval log, and budget usage instead of hiding everything inside one LLM call.',
     contributions: [
-      'Designed the end-to-end agent architecture and pipeline stages.',
-      'Implemented retrieval routing, fallback behavior, and budget controls in code.',
-      'Built the evidence note memory layer, CLI flow, and FastAPI interface.',
+      'Built the full pipeline: FastAPI backend, browser UI, query planner, retrieval router, evidence compression layer, session memory store, and budget enforcement logic.',
+      'Integrated multiple synthesis providers plus safe fallback behavior when hosted model access fails or live APIs are unavailable.',
+      'Implemented source-grounded result rendering with citations, freshness metadata, claim-to-evidence mapping, and both CLI and web interfaces.',
     ],
     outcome:
-      'Enforced hard per-session limits of 2000 context tokens, 8 retained sources, 5 final evidence notes, and $0.05 estimated cost while preserving a full retrieval-to-synthesis workflow.',
+      'The final system runs end-to-end as a working CLI and web app, supports configurable per-query budgets, falls back safely when hosted model access fails, and surfaces structured evidence with clickable citations and freshness indicators.',
     date: 'Mar 2026 - May 2026',
     highlights: [
-      'Hard context and session budget limits -> introduced explicit token, source-count, and evidence-note caps before final synthesis -> the agent had to prioritize only the highest-value evidence instead of passing full context.',
-      'Need for reproducible demos without paid APIs -> built an offline-first corpus path with the same pipeline shape as the live system -> the project remained demoable locally while preserving the budget-management story.',
-      'Retrieval breadth versus reproducibility -> added a router that prefers Tavily when configured and falls back to the local corpus otherwise -> the system could handle both stable demos and broader live research.',
-      'Transparency versus abstraction -> surfaced whether the run used offline or OpenAI synthesis and whether retrieval was live or local -> reviewers can see what the system actually did instead of guessing from a polished UI.',
+      'Bounded memory instead of unlimited context -> ranked evidence notes and trimmed what the agent kept before synthesis -> the system behaved more like a real constrained workflow than a toy chatbot.',
+      'External providers and live APIs can fail unpredictably -> added provider fallback plus a local retrieval path with the same pipeline shape -> the demo still ran end to end when hosted services were unavailable.',
+      'Weak retrieval can push an agent toward hallucination-prone synthesis -> separated retrieval, compression, memory selection, and synthesis into explicit stages -> reviewers can inspect what was retrieved, what was discarded, and why the final answer was produced.',
+      'Transparency had to coexist with a lightweight local demo -> exposed citations, freshness metadata, claim mapping, retrieval logs, and budget usage in the UI without introducing heavyweight infrastructure -> the system stayed inspectable without losing simplicity.',
     ],
-    stack: ['Python', 'FastAPI', 'OpenAI API', 'Tavily', 'CLI', 'LLM orchestration'],
+    stack: ['Python', 'FastAPI', 'JavaScript', 'HTML/CSS', 'Pydantic', 'OpenAI-compatible providers', 'Tavily', 'CLI'],
     links: [{ href: 'https://github.com/kazuhidelee/Budget-constrained_research_agent' }],
   },
   {
@@ -180,26 +181,45 @@ const rawProjects: RawProjectEntry[] = [
   {
     projectName: 'Windrose API',
     description:
-      'A public API that serves historical windrose data for the Detroit Air research site’s air-quality visualization workflows.',
+      'A small Express API that exports meteorological wind data from a MySQL database as CSV for the Detroit Air research site’s visualization workflows.',
     overview:
-      'A standalone backend service for historical windrose data used by an air-quality research application. The project exists because research visualizations need a reusable data service rather than hardcoded file access or one-off scripts embedded in the frontend.',
+      'I built a standalone backend service for historical meteorological data used by the Detroit Air research project. Instead of hardcoding wind data access into the frontend, the project exposes a reusable HTTP API that queries the MRAPID MySQL database and returns CSV exports that downstream visualization tools can consume directly.',
     role: 'Solo project within a research group; owned the API design, implementation, and deployment',
     approach:
-      'The API packages historical regional wind data behind a service layer that can be queried by the research application. It was deployed independently so the Detroit Air site could consume it as a dedicated backend dependency.',
+      'The service runs as a Node/Express API with CORS enabled, exposes a simple readiness route at `/`, and provides a CSV export endpoint at `/meteorological_data/csv`. That route validates a start and end timestamp, reconstructs timestamps from the database columns, filters for rows that include both wind speed and wind direction, and returns the matching dataset as a downloadable CSV attachment. Configuration is handled through environment variables so the same code can run locally or against a deployed database connection.',
     contributions: [
-      'Built the API and defined how windrose data would be exposed to consumers.',
-      'Separated research-specific data logic into a reusable backend service.',
-      'Deployed the service on Google Cloud for research-site integration.',
+      'Built the Express server, route handlers, MySQL query flow, and CSV export behavior in `API.js`.',
+      'Designed the request contract for date-bounded CSV export and added error handling for missing parameters, empty results, and database failures.',
+      'Configured the service for deployment with environment-based database settings and deployed it on Google Cloud for Detroit Air integration.',
     ],
     outcome:
-      'Deployed on Google Cloud for the Detroit Air research project; the Vercel deployment was only used for testing.',
+      'Delivered a working research-facing API that serves downloadable CSV exports from the MRAPID meteorological dataset and was deployed for use by the Detroit Air project.',
     date: '2024',
     highlights: [
-      'Research data is often stored in formats that are inconvenient for frontend visualization -> wrapped the dataset behind a dedicated API layer -> downstream clients could consume a cleaner interface.',
-      'The backend had to serve a real research-facing application rather than a toy demo -> deployed it as a standalone public service -> the system became reusable outside a local dev environment.',
-      'Research tooling often gets embedded in one application and becomes hard to reuse -> separated the windrose logic into its own backend component -> the data service could support the Detroit Air site without coupling the logic to the UI.',
+      'Research data lived in MySQL, but visualization consumers needed flat exportable files -> added a route that converts filtered query results into downloadable CSV -> the frontend could consume structured wind data without embedding database logic.',
+      'The export endpoint needed to support bounded historical queries -> accepted explicit `start_date` and `end_date` parameters and filtered reconstructed timestamps in SQL -> consumers could request only the relevant time window instead of downloading the whole table.',
+      'A small research API still needs predictable failure behavior -> returned clear 400, 404, and 500 responses for missing dates, empty result sets, and query failures -> the service was easier to debug and integrate than a happy-path-only script.',
+      'The same code needed to work across local and deployed environments -> used environment-based database configuration, including socket-path support for Cloud SQL style connections -> deployment stayed simple without hardcoding infrastructure details.',
     ],
-    stack: ['Node.js', 'JavaScript', 'API development', 'Google Cloud'],
+    stack: ['Node.js', 'Express', 'MySQL', 'JavaScript', 'json2csv', 'CORS', 'Google Cloud'],
+    extraSlides: [
+      {
+        title: 'Research Product Context',
+        description:
+          'This screenshot shows the Detroit Air product that consumed the API. The backend work was not just a standalone export script; it fed into a real air-quality interface where geographic and environmental data needed to be queryable and reusable across the research product.',
+        image: '/windrose-detroit-air-map.png',
+        imageAlt: 'Detroit Air research product air quality map',
+        zoomableImage: false,
+      },
+      {
+        title: 'Generated Windrose Output',
+        description:
+          'This example windrose visualization shows the kind of downstream artifact the API supported. The service made it easier to export time-bounded wind speed and direction data in a format that could be plugged into windrose generation and other meteorological analysis workflows.',
+        image: '/windrose-generated-example.png',
+        imageAlt: 'Generated windrose visualization example',
+        zoomableImage: false,
+      },
+    ],
     links: [
       { href: 'https://github.com/kazuhidelee/windrose_api' },
       { href: 'https://detroitair.umich.edu/' },
@@ -333,51 +353,67 @@ const rawProjects: RawProjectEntry[] = [
   {
     projectName: 'Search Engine',
     description:
-      'A search engine that indexes documents and ranks results using tf-idf and PageRank-style scoring over a MapReduce-based processing pipeline.',
+      'A small search engine with a MapReduce-style inverted-index pipeline, shard-based Flask index servers, and a search frontend that merges ranked hits and renders results from document metadata.',
     overview:
-      'A search engine project focused on the systems side of retrieval: document processing, indexing, ranking, and scaling the pipeline instead of only building a search UI.',
+      'I built a search engine project that focused on the systems side of information retrieval rather than just the UI. The project starts with a crawl corpus, builds an inverted index through a multi-stage MapReduce-style pipeline, serves ranked hits from multiple index shards, and then merges those hits in a frontend service that looks up titles, summaries, and URLs from SQLite before rendering results.',
     role: 'Solo',
     approach:
-      'The system processes document collections with custom Python MapReduce scripts, builds an index, and ranks results using tf-idf and PageRank-inspired signals. The main value is the retrieval pipeline and ranking logic rather than the presentation layer.',
+      'The system has three main pieces: an inverted-index pipeline built with madoop, an index_server Flask API that answers `/api/v1/hits/` requests for one shard, and a search_server Flask app that fans out a query to all shards, merges the ranked results, and enriches them with metadata stored in SQLite. Prebuilt shard files can be served directly, or the full index can be regenerated from the crawl corpus through the pipeline.',
     contributions: [
-      'Built the indexing and retrieval pipeline for document processing.',
-      'Implemented scoring and ranking logic using tf-idf and PageRank concepts.',
-      'Integrated custom Python scripts to model distributed indexing workflows.',
+      'Built the inverted-index pipeline over the crawl corpus and structured it as a multi-stage MapReduce-style workflow.',
+      'Implemented the Flask-based index and search services, including shard querying, result aggregation, and metadata lookup.',
+      'Set up the service workflow for rebuilding the SQLite document database, launching multiple shard servers, and running the search UI end to end.',
     ],
     outcome:
-      'Processed roughly 3,062 documents and validated correctness through unit testing.',
+      'Delivered a working local search stack that rebuilds document metadata, serves three index shards on separate ports, aggregates ranked hits across shards, and renders searchable results through a browser UI.',
     date: '2024',
     highlights: [
-      'Search quality depends on more than string matching -> combined term-based relevance with link-structure ranking -> results could reflect both content and graph importance.',
-      'Processing a few thousand documents serially would not reflect real search-engine structure -> built custom Python MapReduce scripts for indexing workflows -> the project better modeled distributed document processing at small scale.',
-      'A retrieval system needs to serve ranked answers, not just indexed data -> designed scoring and ranking around tf-idf and PageRank ideas -> the project demonstrated actual IR fundamentals instead of pure parsing.',
+      'Index construction and query serving are different systems problems -> split the project into an offline inverted-index pipeline plus online Flask services -> the architecture looked more like a real search stack than a single script.',
+      'Serving one large index from one process would hide the distributed retrieval shape -> partitioned the final index across three shard files and queried all shard servers per search -> the frontend had to merge ranked hits across independently served indexes.',
+      'Raw ranked document IDs are not enough for a usable search experience -> built a SQLite-backed metadata database from the crawl HTML and joined search hits with title, summary, and URL data -> the results page could present useful snippets instead of bare identifiers.',
+      'Reproducibility matters for systems demos -> kept prebuilt index shards in the repo while preserving the full pipeline to regenerate them from the crawl corpus -> the project stayed easy to run locally without losing the indexing story.',
     ],
-    stack: ['C++', 'Python', 'Custom MapReduce scripts', 'tf-idf', 'PageRank', 'Unit testing'],
+    stack: ['Python', 'Flask', 'SQLite', 'MapReduce', 'madoop', 'Information retrieval', 'tf-idf', 'PageRank'],
     links: [{ href: 'https://github.com/kazuhidelee/p5-search-engine' }],
   },
   {
     projectName: 'Network File System',
     description:
-      'A multi-threaded network file server that supports remote read, write, and delete operations across concurrent clients.',
+      'A multi-threaded network file server in C++ that handles authenticated remote file operations over encrypted client-server messages while preserving on-disk consistency under concurrent access.',
     overview:
-      'A network file server for concurrent remote filesystem operations. The value here is that it combines file-system semantics, networking, and concurrency control in one system.',
+      'I built a network file server for an operating-systems project that combined several lower-level systems concerns in one place: socket programming, encrypted request handling, filesystem semantics, concurrency control, and crash-safe disk updates. Instead of acting like a toy RPC server, it had to enforce ownership rules, session and sequence-number validity, and correct on-disk behavior across reads, appends, creates, and deletes.',
     role: 'Solo',
     approach:
-      'The service accepts remote client operations and coordinates read, write, and delete requests against server-side state with multithreaded concurrency controls and security checks.',
+      'The server listens for client requests over TCP, decrypts each request using the user password identified in a cleartext header, validates session and sequence numbers to prevent replay, and dispatches each request on a detached worker thread. On disk, the filesystem is a single-directory inode-based layout, so the server caches only the directory inode and free-block map between requests, performs the rest of the necessary reads from disk, and orders writes carefully so metadata never points to invalid blocks after a crash.',
     contributions: [
-      'Implemented the server, request handling, and concurrent file operations.',
-      'Added coordination around shared file state for remote clients.',
-      'Validated behavior through unit tests across core operation types.',
+      'Implemented the C++ file server, socket setup, per-request threading model, encrypted request parsing, and response handling for session, read, append, create, and delete operations.',
+      'Designed the synchronization scheme using reader-writer style locking so compatible requests could proceed in parallel while directory-mutating operations stayed serialized.',
+      'Handled free-block management, directory entry allocation, file ownership checks, and crash-safe disk-write ordering for create, append, and delete operations.',
     ],
     outcome:
-      'Implemented a secure concurrent file-service design and validated behavior through unit testing.',
+      'Delivered a working secure file server that supports concurrent client requests, authenticated encrypted messaging, replay-resistant session sequencing, and correct filesystem updates against an inode-based on-disk format.',
     date: '2025',
     highlights: [
-      'Concurrent clients can interfere with shared file state -> used multithreaded server-side coordination around file operations -> the system could handle remote requests with correctness checks validated by tests.',
-      'File-serving systems need correctness across multiple operation types -> designed explicit handling for read, write, and delete behavior -> the project covered more realistic filesystem semantics than a read-only demo.',
-      'Remote access introduces both security and coordination concerns -> built the server as a secure multi-threaded system -> the design better reflects real backend systems constraints.',
+      'Concurrent requests needed to avoid blocking each other unnecessarily -> designed request handling around detached threads plus reader-writer style synchronization -> session requests, parallel reads, and operations on different files could proceed concurrently without corrupting shared state.',
+      'Create and delete operations mutate shared directory metadata -> separated file-level coordination from directory-level coordination -> appends and reads could stay parallel where safe while directory-changing requests remained serialized.',
+      'The protocol required encrypted messages keyed by user password plus replay protection -> validated usernames, decrypted requests from cleartext size headers, and enforced per-session sequence-number rules -> the server handled authentication and nonce-style request ordering instead of blindly trusting clients.',
+      'Filesystem crashes can leave metadata pointing at garbage blocks -> ordered disk writes so data blocks and inodes were written before metadata that referenced them -> create, append, and delete preserved on-disk consistency even if the server stopped mid-operation.',
+      'The spec limited caching to the directory inode and free-block list -> kept the implementation lightweight and re-read file metadata from disk when needed -> the design matched the assignment constraints without hiding correctness behind aggressive in-memory state.',
     ],
-    stack: ['C++', 'Multithreading', 'Networking', 'File systems', 'Unit testing'],
+    stack: ['C++', 'POSIX sockets', 'Multithreading', 'Reader-writer locks', 'File systems', 'TCP', 'Encrypted messaging', 'Systems testing'],
+    extraSlides: [
+      {
+        title: 'Architecture Notes',
+        description:
+          'This diagram captures the synchronization and traversal strategy I used for core filesystem operations. It maps how create, delete, read, and write requests move through the directory and inode structure, when reader versus writer locks are acquired, and how shared resources like free-block state are protected during updates.',
+        bullets: [
+          'Directory traversal and file access were treated differently so reads could stay concurrent while directory-mutating operations remained serialized.',
+          'The sketch also reflects the inode and data-block layout on disk, which informed both lock placement and crash-safe write ordering.',
+        ],
+        image: '/network-file-system-architecture.png',
+        imageAlt: 'Network file system architecture and lock-traversal notes',
+      },
+    ],
     links: [{ href: 'https://github.com/kazuhidelee/network_file_system' }],
   },
   {
@@ -421,11 +457,11 @@ const rawProjects: RawProjectEntry[] = [
       {
         title: 'Related Work',
         description:
-          'The presentation contrasted non-parametric and parametric colorization approaches before positioning the team’s method.',
+          'Our project team explored and constrasted non-parametric and parametric colorization approaches before positioning the our method.',
         bullets: [
           'Non-parametric methods transfer colors from reference images and work well only when good matches exist, which limits scalability.',
           'Parametric methods learn color predictions from large datasets and generalize better, but must handle multimodal color prediction and rare color classes.',
-          'The team used a parametric, classification-based direction but adapted it for lower compute and less data.',
+          'We ended up using a parametric, classification-based direction but adapted it for lower compute and less data.',
         ],
         images: [
           { src: '/bw-non-parametric-method.png', alt: 'Example of a non-parametric image colorization method using reference candidates' },
@@ -449,7 +485,7 @@ const rawProjects: RawProjectEntry[] = [
       {
         title: 'Objective Function',
         description:
-          'The project framed colorization as multinomial classification over quantized AB-space bins and optimized the model with multinomial cross-entropy loss.',
+          'In this project, we framed colorization as multinomial classification over quantized AB-space bins and optimized the model with multinomial cross-entropy loss.',
         bullets: [
           'The AB output space was quantized with grid size 10 into Q = 40 color bins.',
           'For each input image, the model learned a mapping from luminance input to a probability distribution over possible colors.',
@@ -476,7 +512,7 @@ const rawProjects: RawProjectEntry[] = [
       {
         title: 'Dataset',
         description:
-          'The team trained on scenery images from the Scene Classification Kaggle dataset, which contains around 25,000 images across six natural-scene categories.',
+          'Our team trained on scenery images from the Scene Classification Kaggle dataset, which contains around 25,000 images across six natural-scene categories.',
         bullets: [
           'Categories included buildings, forests, mountains, glaciers, streets, and sea scenes.',
           'For the actual experiment shown in the presentation, the model was trained on 1,000 images.',
@@ -514,7 +550,7 @@ const rawProjects: RawProjectEntry[] = [
       {
         title: 'Evaluation Method',
         description:
-          'The team ran a Google Forms survey with 31 respondents to measure perceived realism of generated images.',
+          'At the end of our project, we also ran a Google Forms survey with 31 respondents to measure perceived realism of generated images.',
         bullets: [
           'The survey mixed the team’s generated images with real images and Zhang et al. outputs as baselines.',
           'Participants rated how realistic each image looked, which turned the evaluation into a human-perception study instead of a purely numeric loss comparison.',
@@ -530,7 +566,7 @@ const rawProjects: RawProjectEntry[] = [
         bullets: [
           'Highest generated-image score: 4.55; lowest generated-image score: 3.10; average generated-image score: 3.89.',
           'Real images averaged 4.06, with scores ranging from 3.77 to 4.35.',
-          'The presentation concluded that scenes dominated by greens and blues looked more realistic, which matched the composition of the training set.',
+          'Our project team was able to conclude that scenes dominated by greens and blues looked more realistic, which matched the composition of the training set.',
         ],
         images: [
           { src: '/bw-generated-sample-1.png', alt: 'Example survey result image for BW Colorization evaluation' },

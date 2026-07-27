@@ -5,7 +5,7 @@ interface ProjectViewerProps {
   path: string;
 }
 
-interface ProjectSlide {
+interface ProjectSection {
   title: string;
   body: ReactNode;
 }
@@ -13,9 +13,8 @@ interface ProjectSlide {
 export function ProjectViewer({ path }: ProjectViewerProps) {
   const slug = path.split('/').pop()?.replace(/\.md$/, '');
   const project = projects.find((item) => item.slug === slug);
-  const [slideIndex, setSlideIndex] = useState(0);
 
-  const slides = useMemo<ProjectSlide[]>(() => {
+  const sections = useMemo<ProjectSection[]>(() => {
     if (!project) {
       return [];
     }
@@ -54,7 +53,16 @@ export function ProjectViewer({ path }: ProjectViewerProps) {
               ) : null}
             </div>
             {slide.image ? (
-              <ZoomableImage src={slide.image} alt={slide.imageAlt || slide.title} />
+              slide.zoomableImage === false ? (
+                <img
+                  src={slide.image}
+                  alt={slide.imageAlt || slide.title}
+                  draggable={false}
+                  className="block w-full select-none object-contain"
+                />
+              ) : (
+                <ZoomableImage src={slide.image} alt={slide.imageAlt || slide.title} />
+              )
             ) : null}
             {!slide.image && slide.images?.length ? (
               <div className="space-y-4">
@@ -130,17 +138,9 @@ export function ProjectViewer({ path }: ProjectViewerProps) {
     ];
   }, [project]);
 
-  useEffect(() => {
-    setSlideIndex(0);
-  }, [slug]);
-
   if (!project) {
     return <div className="p-5 text-sm text-accent-red">Project not found.</div>;
   }
-
-  const currentSlide = slides[slideIndex];
-  const isFirst = slideIndex === 0;
-  const isLast = slideIndex === slides.length - 1;
 
   return (
     <div className="h-full min-h-0 bg-[#c0c0c0] p-2">
@@ -154,57 +154,31 @@ export function ProjectViewer({ path }: ProjectViewerProps) {
             <span>Help</span>
           </div>
           <div className="text-[10px] text-black/70">
-            {slideIndex + 1}/{slides.length}
+            {sections.length} sections
           </div>
         </div>
 
         <div className="mx-2 mt-2 flex-1 min-h-0 border border-black bg-white shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff]">
           <div className="flex h-full min-h-0 flex-col">
             <div className="border-b border-black bg-[#f3f3f3] px-3 py-2 text-sm font-bold text-black">
-              {currentSlide.title}
+              {project.title}
             </div>
-            <CustomScrollArea>{currentSlide.body}</CustomScrollArea>
-          </div>
-        </div>
-
-        <div className="mx-2 mt-2 border border-black bg-[#d4d0c8] px-3 py-2 shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff]">
-          <div className="mb-2 h-[6px] border border-black bg-[#efefef] shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#808080]">
-            <div
-              className="h-full bg-[#4d5ca8]"
-              style={{ width: `${((slideIndex + 1) / slides.length) * 100}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ControlButton label="|<" onClick={() => setSlideIndex(0)} disabled={isFirst} />
-              <ControlButton label="<<" onClick={() => setSlideIndex((index) => Math.max(0, index - 1))} disabled={isFirst} />
-              <ControlButton label=">>" onClick={() => setSlideIndex((index) => Math.min(slides.length - 1, index + 1))} disabled={isLast} />
-              <ControlButton label=">|" onClick={() => setSlideIndex(slides.length - 1)} disabled={isLast} />
-            </div>
-            <div className="text-[11px] text-black">{currentSlide.title}</div>
+            <CustomScrollArea>
+              <div className="space-y-8">
+                {sections.map((section) => (
+                  <section key={section.title} className="space-y-3">
+                    <div className="border-b border-[#c7c7c7] pb-2 text-lg font-bold text-black">
+                      {section.title}
+                    </div>
+                    {section.body}
+                  </section>
+                ))}
+              </div>
+            </CustomScrollArea>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-interface ControlButtonProps {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-}
-
-function ControlButton({ label, onClick, disabled = false }: ControlButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="min-w-[42px] border border-black bg-[#d4d0c8] px-2 py-1 text-[11px] text-black shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff] disabled:text-black/40"
-    >
-      {label}
-    </button>
   );
 }
 
@@ -359,6 +333,7 @@ interface ZoomableImageProps {
 
 function ZoomableImage({ src, alt }: ZoomableImageProps) {
   const [zoom, setZoom] = useState(100);
+  const [naturalSize, setNaturalSize] = useState({ width: 4, height: 3 });
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<{ startX: number; startY: number; left: number; top: number } | null>(null);
 
@@ -422,8 +397,11 @@ function ZoomableImage({ src, alt }: ZoomableImageProps) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className="paint-scroll-area h-[460px] overflow-scroll bg-[#c0c0c0] p-2 [scrollbar-gutter:stable_both-edges]"
+        className="paint-scroll-area w-full overflow-scroll bg-[#c0c0c0] p-2 [scrollbar-gutter:stable_both-edges]"
         style={{
+          aspectRatio: `${naturalSize.width} / ${naturalSize.height}`,
+          minHeight: '260px',
+          maxHeight: '560px',
           backgroundImage:
             'linear-gradient(45deg, #ececec 25%, transparent 25%), linear-gradient(-45deg, #ececec 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ececec 75%), linear-gradient(-45deg, transparent 75%, #ececec 75%)',
           backgroundSize: '24px 24px',
@@ -434,6 +412,12 @@ function ZoomableImage({ src, alt }: ZoomableImageProps) {
         <img
           src={src}
           alt={alt}
+          onLoad={(event) =>
+            setNaturalSize({
+              width: event.currentTarget.naturalWidth || 4,
+              height: event.currentTarget.naturalHeight || 3,
+            })
+          }
           draggable={false}
           className="block max-w-none select-none object-contain"
           style={{ width: `${zoom}%` }}
