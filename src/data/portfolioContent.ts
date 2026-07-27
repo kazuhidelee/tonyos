@@ -132,7 +132,7 @@ const rawProjects: RawProjectEntry[] = [
     description:
       'A budget-constrained research agent that answers multi-step questions by planning sub-queries, retrieving evidence, compressing sources into notes, and synthesizing a final answer under explicit token and cost limits.',
     overview:
-      'I built a budget-aware research agent that answers complex questions by decomposing them into subproblems, retrieving supporting evidence, ranking and compressing that evidence, and generating a final recommendation under explicit session constraints. A lot of AI research assistant projects are really just wrappers around a single model call; I wanted to build a version where context, memory, and cost constraints were visible and enforced.',
+      'I wanted to build this because I kept running into the same frustration with research workflows: once context filled up or usage got expensive, I had almost no control over what the system kept, dropped, or spent. A lot of AI research assistant projects also feel like thin wrappers around one model call, so I wanted to make a version where memory, token usage, and cost constraints were visible, adjustable, and actually enforced.',
     role: 'Solo',
     approach:
       'The system starts by planning sub-questions from a user query, then routes retrieval to live web search or a local fallback corpus. Retrieved documents are compressed into evidence notes, stored in a temporary memory layer, filtered through a budget manager that limits retained sources, tokens, and estimated cost, and finally synthesized from only the top retained notes. The UI exposes the answer, evidence trail, claim mapping, retrieval log, and budget usage instead of hiding everything inside one LLM call.',

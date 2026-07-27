@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { projects } from '../../data/portfolioContent';
+import { useWindowStore } from '../../store/useWindowStore';
 
 interface ProjectViewerProps {
   path: string;
+  windowId: string;
 }
 
 interface ProjectSection {
@@ -10,23 +12,204 @@ interface ProjectSection {
   body: ReactNode;
 }
 
-export function ProjectViewer({ path }: ProjectViewerProps) {
+function normalizeForComparison(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((token) => token.length > 2);
+}
+
+function trimDuplicateIntro(summary: string, overview: string) {
+  const trimmedOverview = overview.trim();
+  if (!trimmedOverview) {
+    return '';
+  }
+
+  const firstSentenceMatch = trimmedOverview.match(/^.*?[.!?](?:\s|$)/);
+  if (!firstSentenceMatch) {
+    return trimmedOverview;
+  }
+
+  const firstSentence = firstSentenceMatch[0].trim();
+  const rest = trimmedOverview.slice(firstSentenceMatch[0].length).trim();
+  const summaryTokens = new Set(normalizeForComparison(summary));
+  const firstSentenceTokens = normalizeForComparison(firstSentence);
+
+  if (!summaryTokens.size || !firstSentenceTokens.length) {
+    return trimmedOverview;
+  }
+
+  const overlapCount = firstSentenceTokens.filter((token) => summaryTokens.has(token)).length;
+  const overlapRatio = overlapCount / Math.max(firstSentenceTokens.length, 1);
+
+  if (overlapRatio >= 0.35 && rest) {
+    return rest;
+  }
+
+  return trimmedOverview;
+}
+
+function toFirstPersonBuildLine(summary: string) {
+  const trimmed = summary.trim();
+  if (!trimmed) {
+    return '';
+  }
+  if (/^i\s/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `I built ${trimmed.charAt(0).toLowerCase()}${trimmed.slice(1)}`;
+}
+
+function renderExtraSlide(slide: {
+  title: string;
+  description?: string;
+  bullets?: string[];
+  image?: string;
+  imageAlt?: string;
+  zoomableImage?: boolean;
+  images?: Array<{ src: string; alt: string }>;
+}) {
+  return (
+    <section key={slide.title} className="space-y-3">
+      <div className="font-bold">{slide.title}</div>
+      <div className={slide.image || slide.images?.length ? 'grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]' : 'space-y-4'}>
+        <div className="space-y-4">
+          {slide.description ? <p>{slide.description}</p> : null}
+          {slide.bullets?.length ? (
+            <ul className="space-y-3">
+              {slide.bullets.map((item) => (
+                <li key={item}>- {item}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+        {slide.image ? (
+          slide.zoomableImage === false ? (
+            <img
+              src={slide.image}
+              alt={slide.imageAlt || slide.title}
+              draggable={false}
+              className="block w-full select-none object-contain"
+            />
+          ) : (
+            <ZoomableImage src={slide.image} alt={slide.imageAlt || slide.title} />
+          )
+        ) : null}
+        {!slide.image && slide.images?.length ? (
+          <div className="space-y-4">
+            {slide.images.map((image) => (
+              <img
+                key={image.src}
+                src={image.src}
+                alt={image.alt}
+                draggable={false}
+                className="block w-full select-none object-contain"
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function isResultSlide(title: string) {
+  const normalized = title.toLowerCase();
+  return normalized.includes('result') || normalized.includes('output') || normalized.includes('impact');
+}
+
+const projectIcons: Record<string, string> = {
+  'bw-colorization': `${import.meta.env.BASE_URL}project-icon-bw-colorization.jpeg`,
+  concordia: `${import.meta.env.BASE_URL}concordia-preview.png`,
+  'network-file-system': `${import.meta.env.BASE_URL}network-file-system-preview.png`,
+  'search-engine': `${import.meta.env.BASE_URL}project-icon-search-engine.jpeg`,
+  'tamagotchi-os': `${import.meta.env.BASE_URL}project-icon-tamagotchi-os.jpeg`,
+  'windrose-api': `${import.meta.env.BASE_URL}project-icon-windrose-api.jpeg`,
+};
+
+const projectIconPositions: Record<string, string> = {
+  concordia: '65% center',
+};
+
+export function ProjectViewer({ path, windowId }: ProjectViewerProps) {
   const slug = path.split('/').pop()?.replace(/\.md$/, '');
   const project = projects.find((item) => item.slug === slug);
+  const [activeTab, setActiveTab] = useState('General');
+  const { closeWindow } = useWindowStore();
 
   const sections = useMemo<ProjectSection[]>(() => {
     if (!project) {
       return [];
     }
 
+    const resultSlides = project.extraSlides.filter((slide) => isResultSlide(slide.title));
+    const architectureSlides = project.extraSlides.filter((slide) => !isResultSlide(slide.title));
+
     return [
       {
-        title: 'Overview',
+        title: 'General',
+        body: (
+          <div className="grid gap-5 lg:grid-cols-[210px_1fr]">
+            <div className="flex items-start justify-center">
+              <div className="border border-[#808080] bg-[#c0c0c0] p-2 shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#808080]">
+                <div className="border border-[#808080] bg-[#d4d0c8] p-3 shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff]">
+                  <img
+                    src={projectIcons[project.slug] ?? `${import.meta.env.BASE_URL}merlin-microsoft-wizard.jpeg`}
+                    alt={`${project.title} icon`}
+                    draggable={false}
+                    className="block h-[150px] w-[150px] select-none object-contain"
+                    style={{ objectPosition: projectIconPositions[project.slug] ?? 'center' }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-5">
+              <div>
+                <div className="font-bold">Project Name:</div>
+                <div className="ml-4 font-bold">{project.title}</div>
+              </div>
+              <div>
+                <div className="font-bold">Project Summary:</div>
+                <div className="ml-4 space-y-2">
+                  <div>{project.summary}</div>
+                  <div>{project.outcome}</div>
+                </div>
+              </div>
+              <div>
+                <div className="font-bold">Stack:</div>
+                <div className="ml-4">{project.tech.join(', ')}</div>
+              </div>
+              <div>
+                <div className="font-bold">Links:</div>
+                <div className="ml-4 space-y-1">
+                  {project.links.length ? (
+                    project.links.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block underline"
+                      >
+                        {link.label}
+                      </a>
+                    ))
+                  ) : (
+                    <div>No external links for this project.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        title: 'Introduction',
         body: (
           <div className="space-y-4">
-            <p className="text-lg font-bold">{project.title}</p>
-            <p>{project.summary}</p>
-            <p>{project.overview}</p>
+            <p>{toFirstPersonBuildLine(project.summary)}</p>
+            <p>{trimDuplicateIntro(project.summary, project.overview)}</p>
           </div>
         ),
       },
@@ -34,293 +217,154 @@ export function ProjectViewer({ path }: ProjectViewerProps) {
         title: 'Approach / Architecture',
         body: (
           <div className="space-y-4">
+            <p>The way I approached it was to break the system into a few clear pieces instead of hiding everything inside one big flow.</p>
             <p>{project.approach}</p>
-          </div>
-        ),
-      },
-      ...project.extraSlides.map((slide) => ({
-        title: slide.title,
-        body: (
-          <div className={slide.image || slide.images?.length ? 'grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]' : 'space-y-4'}>
-            <div className="space-y-4">
-              {slide.description ? <p>{slide.description}</p> : null}
-              {slide.bullets?.length ? (
-                <ul className="space-y-3">
-                  {slide.bullets.map((item) => (
-                    <li key={item}>- {item}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-            {slide.image ? (
-              slide.zoomableImage === false ? (
-                <img
-                  src={slide.image}
-                  alt={slide.imageAlt || slide.title}
-                  draggable={false}
-                  className="block w-full select-none object-contain"
-                />
-              ) : (
-                <ZoomableImage src={slide.image} alt={slide.imageAlt || slide.title} />
-              )
-            ) : null}
-            {!slide.image && slide.images?.length ? (
-              <div className="space-y-4">
-                {slide.images.map((image) => (
-                  <img
-                    key={image.src}
-                    src={image.src}
-                    alt={image.alt}
-                    draggable={false}
-                    className="block w-full select-none object-contain"
-                  />
-                ))}
+            {architectureSlides.length ? (
+              <div className="space-y-6">
+                {architectureSlides.map((slide) => renderExtraSlide(slide))}
               </div>
             ) : null}
           </div>
         ),
-      })),
+      },
       {
         title: 'Technical Challenges',
         body: (
-          <ul className="space-y-3">
-            {project.decisions.map((item) => (
-              <li key={item}>- {item}</li>
-            ))}
-          </ul>
+          <div className="space-y-4">
+            <p>The hardest part was making the project feel real and usable instead of stopping at a class-demo version.</p>
+            <ul className="space-y-3">
+              {project.decisions.map((item) => (
+                <li key={item}>- {item}</li>
+              ))}
+            </ul>
+          </div>
         ),
       },
       {
-        title: 'Results / Impact',
+        title: 'Result',
         body: (
           <div className="space-y-4">
+            <p>What I like most about the end result is that it works as a full system instead of just a prototype on paper.</p>
             <p>
               <span className="font-bold">Key outcome:</span> {project.outcome}
             </p>
+            {resultSlides.length ? (
+              <div className="space-y-6">
+                {resultSlides.map((slide) => renderExtraSlide(slide))}
+              </div>
+            ) : null}
           </div>
-        ),
-      },
-      {
-        title: 'Tech Stack',
-        body: (
-          <div className="flex flex-wrap gap-2">
-            {project.tech.map((item) => (
-              <span
-                key={item}
-                className="border border-black bg-[#f5f5f5] px-2 py-1 text-xs shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#808080]"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        ),
-      },
-      {
-        title: 'Links',
-        body: project.links.length ? (
-          <div className="space-y-3">
-            {project.links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-                className="block underline"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        ) : (
-          <p>No external links for this project.</p>
         ),
       },
     ];
   }, [project]);
 
+  useEffect(() => {
+    setActiveTab('General');
+  }, [slug]);
+
   if (!project) {
     return <div className="p-5 text-sm text-accent-red">Project not found.</div>;
   }
 
-  return (
-    <div className="h-full min-h-0 bg-[#c0c0c0] p-2">
-      <div className="flex h-full min-h-0 flex-col border border-black bg-[#d4d0c8] shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff]">
-        <div className="flex items-center justify-between border-b border-black bg-[#ece9d8] px-3 py-1 text-[11px] text-black">
-          <div className="flex items-center gap-3">
-            <span>File</span>
-            <span>View</span>
-            <span>Play</span>
-            <span>Tools</span>
-            <span>Help</span>
-          </div>
-          <div className="text-[10px] text-black/70">
-            {sections.length} sections
-          </div>
-        </div>
+  const currentSection = sections.find((section) => section.title === activeTab) ?? sections[0];
+  const currentIndex = sections.findIndex((section) => section.title === currentSection.title);
+  const isFirstTab = currentIndex <= 0;
+  const isLastTab = currentIndex === sections.length - 1;
 
-        <div className="mx-2 mt-2 flex-1 min-h-0 border border-black bg-white shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff]">
-          <div className="flex h-full min-h-0 flex-col">
-            <div className="border-b border-black bg-[#f3f3f3] px-3 py-2 text-sm font-bold text-black">
-              {project.title}
-            </div>
-            <CustomScrollArea>
-              <div className="space-y-8">
-                {sections.map((section) => (
-                  <section key={section.title} className="space-y-3">
-                    <div className="border-b border-[#c7c7c7] pb-2 text-lg font-bold text-black">
-                      {section.title}
-                    </div>
-                    {section.body}
-                  </section>
-                ))}
-              </div>
-            </CustomScrollArea>
-          </div>
+  return (
+    <div className="flex h-full min-h-0 flex-col border border-black bg-[#c0c0c0] p-[10px] text-[12px] text-black shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff]">
+      <div className="px-4 pt-3">
+        <div className="flex flex-wrap items-end gap-[2px]">
+          {sections.map((section) => {
+            const isActive = section.title === currentSection.title;
+            return (
+              <button
+                key={section.title}
+                type="button"
+                onClick={() => setActiveTab(section.title)}
+                className={`border border-black px-3 py-[3px] text-[12px] leading-none ${
+                  isActive
+                    ? 'relative top-px z-10 border-b-[#c0c0c0] bg-[#c0c0c0] text-black shadow-[inset_-1px_0_0_#808080,inset_1px_1px_0_#ffffff]'
+                    : 'bg-[#c0c0c0] text-black shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff]'
+                }`}
+              >
+                {section.title}
+              </button>
+            );
+          })}
         </div>
+      </div>
+
+      <div className="mx-4 mb-0 mt-0 flex-1 min-h-0 border-t border-l border-r-2 border-b-2 border-t-white border-l-white border-r-black border-b-black bg-[#c0c0c0]">
+        <div className="flex h-full min-h-0 flex-col">
+          <CustomScrollArea>{currentSection.body}</CustomScrollArea>
+        </div>
+      </div>
+
+      <div className="mx-4 mb-4 mt-3 flex justify-end gap-2">
+        {isFirstTab ? (
+          <>
+            <DialogButton label="Cancel" onClick={() => closeWindow(windowId)} />
+            <DialogButton
+              label="Next"
+              onClick={() => setActiveTab(sections[Math.min(currentIndex + 1, sections.length - 1)].title)}
+              disabled={isLastTab}
+              primary
+            />
+          </>
+        ) : (
+          <>
+            <DialogButton
+              label="Prev"
+              onClick={() => setActiveTab(sections[Math.max(currentIndex - 1, 0)].title)}
+            />
+            <DialogButton
+              label="Next"
+              onClick={() => setActiveTab(sections[Math.min(currentIndex + 1, sections.length - 1)].title)}
+              disabled={isLastTab}
+              primary
+            />
+          </>
+        )}
       </div>
     </div>
   );
 }
 
+function DialogButton({
+  label,
+  onClick,
+  primary = false,
+  disabled = false,
+}: {
+  label: string;
+  onClick: () => void;
+  primary?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`min-w-[78px] border border-black bg-[#c0c0c0] px-3 py-[5px] text-[12px] leading-none text-black shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff] active:shadow-[inset_-1px_-1px_0_#ffffff,inset_1px_1px_0_#808080] disabled:text-[#808080] disabled:active:shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#ffffff] ${primary ? 'outline outline-1 outline-black outline-offset-[-4px]' : ''}`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function CustomScrollArea({ children }: { children: ReactNode }) {
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef<{ startY: number; startScrollTop: number } | null>(null);
-  const [metrics, setMetrics] = useState({ clientHeight: 1, scrollHeight: 1, scrollTop: 0 });
-  const buttonHeight = 16;
-  const minThumbHeight = 18;
-  const maxThumbHeight = 56;
-
-  const syncMetrics = () => {
-    const node = contentRef.current;
-    if (!node) {
-      return;
-    }
-    setMetrics({
-      clientHeight: node.clientHeight || 1,
-      scrollHeight: node.scrollHeight || 1,
-      scrollTop: node.scrollTop || 0,
-    });
-  };
-
-  useEffect(() => {
-    syncMetrics();
-    const node = contentRef.current;
-    if (!node) {
-      return;
-    }
-
-    const resizeObserver = new ResizeObserver(() => syncMetrics());
-    resizeObserver.observe(node);
-    return () => resizeObserver.disconnect();
-  }, [children]);
-
-  const scrollable = Math.max(0, metrics.scrollHeight - metrics.clientHeight);
-  const trackHeight = Math.max(1, metrics.clientHeight - buttonHeight * 2);
-  const thumbHeight =
-    scrollable === 0
-      ? trackHeight
-      : Math.min(
-          maxThumbHeight,
-          Math.max(minThumbHeight, (metrics.clientHeight / metrics.scrollHeight) * trackHeight),
-        );
-  const maxThumbTravel = Math.max(0, trackHeight - thumbHeight);
-  const thumbTop = scrollable === 0 ? 0 : (metrics.scrollTop / scrollable) * maxThumbTravel;
-
-  const scrollByAmount = (amount: number) => {
-    const node = contentRef.current;
-    if (!node) {
-      return;
-    }
-    node.scrollTop += amount;
-    syncMetrics();
-  };
-
-  const scrollToTrackPosition = (clientY: number, trackRect: DOMRect) => {
-    const node = contentRef.current;
-    if (!node || scrollable === 0) {
-      return;
-    }
-    const offset = clientY - trackRect.top - thumbHeight / 2;
-    const clampedOffset = Math.min(Math.max(0, offset), maxThumbTravel);
-    node.scrollTop = (clampedOffset / Math.max(1, maxThumbTravel)) * scrollable;
-    syncMetrics();
-  };
-
-  const handleThumbPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const node = contentRef.current;
-    if (!node) {
-      return;
-    }
-    dragRef.current = { startY: event.clientY, startScrollTop: node.scrollTop };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const handleThumbPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const node = contentRef.current;
-    const drag = dragRef.current;
-    if (!node || !drag || scrollable === 0) {
-      return;
-    }
-    const deltaY = event.clientY - drag.startY;
-    const scrollDelta = (deltaY / Math.max(1, maxThumbTravel)) * scrollable;
-    node.scrollTop = drag.startScrollTop + scrollDelta;
-    syncMetrics();
-  };
-
-  const handleThumbPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    dragRef.current = null;
-  };
 
   return (
-    <div className="flex flex-1 min-h-0 bg-white text-sm leading-6 text-black">
+    <div className="flex flex-1 min-h-0 bg-[#c0c0c0] text-[12px] leading-5 text-black">
       <div
         ref={contentRef}
-        onScroll={syncMetrics}
-        className="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden px-4 py-4"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="classic-scroll-area flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-[#c0c0c0] px-4 py-3"
       >
-        <style>{`.hide-native-scrollbar::-webkit-scrollbar{display:none}`}</style>
-        <div className="hide-native-scrollbar">{children}</div>
-      </div>
-
-      <div className="w-[16px] shrink-0 border-l border-black bg-[#d4d0c8]">
-        <button
-          type="button"
-          aria-label="Scroll up"
-          onClick={() => scrollByAmount(-80)}
-          className="block h-[16px] w-[16px] bg-[url('/scroll-up-button.png')] bg-cover bg-center"
-        />
-        <div
-          className="relative w-[16px] bg-[url('/scroll-track.png')] bg-repeat-y bg-top"
-          style={{ height: trackHeight }}
-          onPointerDown={(event) => {
-            const target = event.currentTarget;
-            if (event.target !== target) {
-              return;
-            }
-            scrollToTrackPosition(event.clientY, target.getBoundingClientRect());
-          }}
-        >
-          <button
-            type="button"
-            aria-label="Scroll thumb"
-            onPointerDown={handleThumbPointerDown}
-            onPointerMove={handleThumbPointerMove}
-            onPointerUp={handleThumbPointerUp}
-            onPointerCancel={handleThumbPointerUp}
-            className="absolute left-0 w-[16px] cursor-grab bg-[url('/scroll-thumb.png')] bg-cover bg-center active:cursor-grabbing"
-            style={{ top: thumbTop, height: thumbHeight }}
-          />
-        </div>
-        <button
-          type="button"
-          aria-label="Scroll down"
-          onClick={() => scrollByAmount(80)}
-          className="block h-[16px] w-[16px] bg-[url('/scroll-down-button.png')] bg-cover bg-center"
-        />
+        <div>{children}</div>
       </div>
     </div>
   );

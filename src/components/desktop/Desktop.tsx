@@ -216,7 +216,7 @@ function WindowContent({ window }: { window: AppWindow }) {
     case "image":
       return <ImageViewer path={(window.payload as { path: string }).path} />;
     case "project":
-      return <ProjectViewer path={(window.payload as { path: string }).path} />;
+      return <ProjectViewer windowId={window.id} path={(window.payload as { path: string }).path} />;
     default:
       return <div className="p-5">Unsupported app.</div>;
   }

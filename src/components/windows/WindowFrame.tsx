@@ -67,7 +67,15 @@ export function WindowFrame({ window, children }: WindowFrameProps) {
 
   const startResize = (
     event: ReactPointerEvent<HTMLDivElement>,
-    direction: 'right' | 'bottom' | 'corner',
+    direction:
+      | 'left'
+      | 'right'
+      | 'top'
+      | 'bottom'
+      | 'topLeft'
+      | 'topRight'
+      | 'bottomLeft'
+      | 'bottomRight',
   ) => {
     if (window.isMaximized) {
       return;
@@ -79,17 +87,49 @@ export function WindowFrame({ window, children }: WindowFrameProps) {
     const startX = event.clientX;
     const startY = event.clientY;
     const startSize = window.size;
+    const startPosition = window.position;
 
     const onMove = (moveEvent: PointerEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      const resizingLeft = direction === 'left' || direction === 'topLeft' || direction === 'bottomLeft';
+      const resizingRight = direction === 'right' || direction === 'topRight' || direction === 'bottomRight';
+      const resizingTop = direction === 'top' || direction === 'topLeft' || direction === 'topRight';
+      const resizingBottom = direction === 'bottom' || direction === 'bottomLeft' || direction === 'bottomRight';
+
+      let nextWidth = startSize.width;
+      let nextHeight = startSize.height;
+      let nextX = startPosition.x;
+      let nextY = startPosition.y;
+
+      if (resizingRight) {
+        nextWidth = Math.max(minWidth, startSize.width + deltaX);
+      }
+
+      if (resizingBottom) {
+        nextHeight = Math.max(minHeight, startSize.height + deltaY);
+      }
+
+      if (resizingLeft) {
+        const proposedWidth = startSize.width - deltaX;
+        nextWidth = Math.max(minWidth, proposedWidth);
+        nextX = startPosition.x + (startSize.width - nextWidth);
+      }
+
+      if (resizingTop) {
+        const proposedHeight = startSize.height - deltaY;
+        nextHeight = Math.max(minHeight, proposedHeight);
+        nextY = startPosition.y + (startSize.height - nextHeight);
+      }
+
+      moveWindow(window.id, {
+        x: Math.max(0, nextX),
+        y: Math.max(0, nextY),
+      });
       resizeWindow(window.id, {
-        width:
-          direction === 'bottom'
-            ? startSize.width
-            : Math.max(minWidth, startSize.width + moveEvent.clientX - startX),
-        height:
-          direction === 'right'
-            ? startSize.height
-            : Math.max(minHeight, startSize.height + moveEvent.clientY - startY),
+        width: nextWidth,
+        height: nextHeight,
       });
     };
 
@@ -170,9 +210,19 @@ export function WindowFrame({ window, children }: WindowFrameProps) {
       {!window.isMaximized ? (
         <>
           <div
+            onPointerDown={(event) => startResize(event, 'left')}
+            className="absolute left-0 top-[24px] bottom-[4px] w-3 cursor-ew-resize"
+            title="Resize window width"
+          />
+          <div
             onPointerDown={(event) => startResize(event, 'right')}
             className="absolute right-0 top-[24px] bottom-[4px] w-3 cursor-ew-resize"
             title="Resize window width"
+          />
+          <div
+            onPointerDown={(event) => startResize(event, 'top')}
+            className="absolute left-[4px] right-[4px] top-0 h-3 cursor-ns-resize"
+            title="Resize window height"
           />
           <div
             onPointerDown={(event) => startResize(event, 'bottom')}
@@ -180,7 +230,22 @@ export function WindowFrame({ window, children }: WindowFrameProps) {
             title="Resize window height"
           />
           <div
-            onPointerDown={(event) => startResize(event, 'corner')}
+            onPointerDown={(event) => startResize(event, 'topLeft')}
+            className="absolute left-0 top-0 h-5 w-5 cursor-nwse-resize"
+            title="Resize window"
+          />
+          <div
+            onPointerDown={(event) => startResize(event, 'topRight')}
+            className="absolute right-0 top-0 h-5 w-5 cursor-nesw-resize"
+            title="Resize window"
+          />
+          <div
+            onPointerDown={(event) => startResize(event, 'bottomLeft')}
+            className="absolute bottom-0 left-0 h-5 w-5 cursor-nesw-resize"
+            title="Resize window"
+          />
+          <div
+            onPointerDown={(event) => startResize(event, 'bottomRight')}
             className="absolute bottom-0 right-0 h-5 w-5 cursor-nwse-resize"
             title="Resize window"
           >

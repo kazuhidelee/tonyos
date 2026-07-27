@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { Win95Button } from '../ui/Win95Button';
 
-const resumeFile = `${import.meta.env.BASE_URL}Kazuhide_Tony_Lee_Updated_Resume.pdf`;
+const resumePath = `${import.meta.env.BASE_URL}Kazuhide_Tony_Lee_Updated_Resume.pdf`;
 
 export function ResumeApp() {
+  const resumeFile = useMemo(() => `${resumePath}?v=${Date.now()}`, []);
+
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] p-3 text-black">
       <div className="mb-3 flex items-center justify-between gap-3">
